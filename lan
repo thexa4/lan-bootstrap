@@ -9,7 +9,7 @@
 
 IP_RANGE="192.168.1."
 REPO="https://github.com/thexa4/lan-bootstrap.git"
-DEBIAN_VERSION=8
+DEBIAN_VERSION=7
 
 ### End constants
 
@@ -19,7 +19,7 @@ IFS=$'\n\t'
 subcommand=${1:-help}
 
 function help {
-	echo "Usage: $0 cluster_name ip_range container_root_pw"
+	echo "Usage: $0 init cluster_name container_root_pw"
 	exit 1
 }
 
@@ -264,7 +264,6 @@ eYNuH6BwkKfqq77CEwCg2BK03uW0u2sBh4x068sXWE7nHLc=
 -----END PGP PUBLIC KEY BLOCK-----
 KEYFILE
 	
-		echo ${debian_version_nr}
 		cd /var/lib/vz/template/cache/
 		filename="debian-${DEBIAN_VERSION}.0-x86.tar.gz"
 		if ! [ -f "$filename" ]; then
@@ -297,6 +296,7 @@ function init {
 	cluster_name=$1
 	password=$2
 	
+	rm -f /etc/apt/sources.list.d/pve-enterprise.list
 	apt-get update
 	apt-get --yes dist-upgrade
 
@@ -314,9 +314,14 @@ function join {
 	init_template
 }
 
-case $subsystem in
+case $subcommand in
 	init)
+		if [ $# -ne 3 ]; then
+			help
+		fi
+
 		init $2 $3
+		;;
 	*)
 		help
 		;;
