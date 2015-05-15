@@ -312,6 +312,16 @@ function init_vm_puppet {
 	vzctl exec 101 puppet agent
 }
 
+function init_vm_ns1 {
+	password=$1
+	domain=$2
+	
+	create_vm ns1 102 ${password}
+	
+	vzctl exec 102 "echo $(get_ip 101) puppet puppet.${domain} >> /etc/hosts"
+	puppet_init 102
+}
+
 function init {
 	cluster_name=$1
 	domain=$2
@@ -340,6 +350,7 @@ RESOLV
 	fi
 
 	init_vm_puppet ${password} ${domain}
+	init_vm_ns1 ${password} ${domain}
 }
 
 function join {
