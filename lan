@@ -238,15 +238,15 @@ PUPPETKEY
 function puppet_run {
 	vmid=$1
 	
-	vzctl exec ${vmid} 'puppet agent'
+	vzctl exec ${vmid} puppet agent
 }
 
 function puppet_init {
 	vmid=$1
 	
 	fqdn=$(vzctl exec ${vmid} 'hostname --fqdn')
-	puppet_run $vmid
-	vzctl exec 101 puppet ca sign "${fqdn}"
+	vzctl exec ${vmid} puppet agent --test
+	vzctl exec 101 puppet ca sign "${fqdn}" > /dev/null
 	puppet_run $vmid
 }
 
