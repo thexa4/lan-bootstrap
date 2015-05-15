@@ -50,7 +50,7 @@ function create_vm {
 	sleep 1
 	
 	echo Updating ct ${hostname}
-	vzctl exec ${vmid} apt-get -qq update
+	vzctl exec ${vmid} apt-get -qq update > /dev/null
 	vzctl exec ${vmid} apt-get -qq --yes install debian-keyring > /dev/null
 	vzctl exec ${vmid} apt-get -qq update
 
@@ -231,7 +231,7 @@ PUPPETKEY
 	vzctl exec ${vmid} 'rm /root/puppet.gpg'
 	echo Installing puppet on ${hostname}
 	vzctl exec ${vmid} apt-get -qq update
-	vzctl exec ${vmid} apt-get -qq --yes install puppet
+	vzctl exec ${vmid} apt-get -qq --yes install puppet > /dev/null
 	echo Finished initialization of ${hostname}
 }
 
