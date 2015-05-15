@@ -246,7 +246,7 @@ function puppet_init {
 	
 	fqdn=$(vzctl exec ${vmid} 'hostname --fqdn')
 	puppet_run $vmid
-	vzctl exec 101 "puppet ca sign \"${fqdn}\""
+	vzctl exec 101 puppet ca sign "${fqdn}"
 	puppet_run $vmid
 }
 
