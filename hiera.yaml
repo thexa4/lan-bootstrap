@@ -1,0 +1,8 @@
+---
+:hierarchy:
+    - "role/%{::hostname_role}"
+    - common
+:backends:
+    - yaml
+:yaml:
+    - :datadir: '/etc/puppet/hieradata'

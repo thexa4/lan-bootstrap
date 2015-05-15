@@ -50,9 +50,9 @@ function create_vm {
 	sleep 1
 	
 	echo Updating ct ${hostname}
-	vzctl exec ${vmid} apt-get -qq update > /dev/null
+	vzctl exec ${vmid} apt-get -qq update > /dev/null 2> /dev/null
 	vzctl exec ${vmid} apt-get -qq --yes install debian-keyring > /dev/null
-	vzctl exec ${vmid} apt-get -qq update
+	vzctl exec ${vmid} apt-get -qq update 2> /dev/null
 
 	vzctl exec ${vmid} apt-get -qq --yes dist-upgrade > /dev/null
 	
@@ -298,10 +298,14 @@ function init_vm_puppet {
 	vzctl exec 101 apt-get -qq --yes install puppetmaster git
 	vzctl exec 101 mkdir /opt/max
 	vzctl exec 101 git clone ${REPO} /opt/max/puppet-lan > /dev/null
-	vzctl exec 101 rm -r /etc/puppet/modules
+	vzctl exec 101 rm -r /etc/puppet/modules /etc/puppet/puppet.conf
+	
+	vzctl exec 101 ln -s /opt/max/puppet-lan/puppet.conf /etc/puppet/puppet.conf
 	vzctl exec 101 ln -s /opt/max/puppet-lan/modules /etc/puppet/modules
-	vzctl exec 101 rm -f /etc/puppet/manifests/site.pp
-	vzctl exec 101 ln -s /opt/max/puppet-lan/manifests/site.pp /etc/puppet/manifests/site.pp
+	vzctl exec 101 ln -s /opt/max/puppet-lan/hiera.yaml /etc/puppet/hiera.yaml
+	vzctl exec 101 ln -s /opt/max/puppet-lan/hieradata /etc/puppet/hieradata
+	
+	vzctl exec 101 service puppetmaster restart
 	vzctl exec 101 puppet agent
 }
 
