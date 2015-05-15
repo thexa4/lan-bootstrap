@@ -1,6 +1,7 @@
 ---
 :hierarchy:
     - "role/%{::hostname_role}"
+    - local
     - common
 :backends:
     - yaml
