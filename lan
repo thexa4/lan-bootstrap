@@ -16,10 +16,12 @@ DEBIAN_VERSION=7
 set -euo pipefail
 IFS=$'\n\t'
 
+TEMPLATE_NAME=debian-${DEBIAN_VERSION}.0-x86-minimal.tar.gz
+
 subcommand=${1:-help}
 
 function help {
-	echo "Usage: $0 init cluster_name container_root_pw"
+	echo "Usage: $0 init cluster_name domain container_root_pw"
 	exit 1
 }
 
@@ -42,9 +44,19 @@ function create_vm {
 	
 	ip=$(get_ip $vmid)
 	
-	pvectl create ${vmid} /var/lib/vz/template/cache/debian-${DEBIAN_VERSION}.0-x86.tar.gz -disk ${disk} -hostname ${hostname} -ip_address ${ip} -onboot 1 -password ${password}
-	pvectl start ${vmid}
+	echo "Creating ct ${hostname} (vmid: ${vmid}, disk: ${disk}, ip: ${ip})"
+	pvectl create ${vmid} /var/lib/vz/template/cache/${TEMPLATE_NAME} -disk ${disk} -hostname ${hostname} -ip_address ${ip} -onboot 1 -password ${password} > /dev/null
+	pvectl start ${vmid} > /dev/null
+	sleep 1
 	
+	echo Updating ct ${hostname}
+	vzctl exec ${vmid} apt-get -qq update
+	vzctl exec ${vmid} apt-get -qq --yes install debian-keyring > /dev/null
+	vzctl exec ${vmid} apt-get -qq update
+
+	vzctl exec ${vmid} apt-get -qq --yes dist-upgrade > /dev/null
+	
+	echo Trusting puppet on ${vmid}
 	vzctl exec ${vmid} 'echo deb http://apt.puppetlabs.com wheezy main >> /etc/apt/sources.list'
 	cat > /var/lib/vz/private/${vmid}/root/puppet.gpg << PUPPETKEY
 -----BEGIN PGP PUBLIC KEY BLOCK-----
@@ -215,11 +227,12 @@ ZTQcCD53HcBLvKX6RJ4ByYawKaQqMa27WK/YWVmFXqVDVk12iKrQW6zktDdGInnD
 =Gl+v
 -----END PGP PUBLIC KEY BLOCK-----
 PUPPETKEY
-	vzctl exec ${vmid} 'apt-key add /root/puppet.gpg'
+	vzctl exec ${vmid} 'apt-key add /root/puppet.gpg' > /dev/null
 	vzctl exec ${vmid} 'rm /root/puppet.gpg'
-	vzctl exec ${vmid} apt-get update
-	vzctl exec ${vmid} apt-get --yes dist-upgrade
-	vzctl exec $i apt-get --yes install puppet
+	echo Installing puppet on ${hostname}
+	vzctl exec ${vmid} apt-get -qq update
+	vzctl exec ${vmid} apt-get -qq --yes install puppet
+	echo Finished initialization of ${hostname}
 }
 
 function puppet_run {
@@ -239,7 +252,7 @@ function puppet_init {
 
 function init_template {
 		(
-		gpg --import << KEYFILE
+		gpg --import 2> /dev/null << KEYFILE
 -----BEGIN PGP PUBLIC KEY BLOCK-----
 Version: SKS 1.1.3
 
@@ -265,13 +278,12 @@ eYNuH6BwkKfqq77CEwCg2BK03uW0u2sBh4x068sXWE7nHLc=
 KEYFILE
 	
 		cd /var/lib/vz/template/cache/
-		filename="debian-${DEBIAN_VERSION}.0-x86.tar.gz"
-		if ! [ -f "$filename" ]; then
-			wget http://download.openvz.org/template/precreated/$filename
+		if ! [ -f "${TEMPLATE_NAME}" ]; then
+			wget http://download.openvz.org/template/precreated/${TEMPLATE_NAME}
 		fi
-		rm -f "$filename.asc"
-		wget http://download.openvz.org/template/precreated/${filename}.asc
-		gpg --verify ${filename}.asc || ( rm ${filename}; exit 1 ) 
+		rm -f "${TEMPLATE_NAME}.asc"
+		wget http://download.openvz.org/template/precreated/${TEMPLATE_NAME}.asc -nv
+		gpg -q --verify ${TEMPLATE_NAME}.asc 2> /dev/null || ( rm ${TEMPLATE_NAME}; exit 1 ) 
 	) || (
 		echo "Unable to download verified template"
 		exit 1
@@ -282,30 +294,45 @@ function init_vm_puppet {
 	password=$1
 	
 	create_vm puppet 101 ${password}
-	vzctl exec 101 apt-get --yes install puppetmaster git
+	
+	vzctl exec 101 apt-get -qq --yes install puppetmaster git
 	vzctl exec 101 mkdir /opt/max
-	vzctl exec 101 git clone ${REPO} /opt/max/puppet-lan
-	vzctl exec 101 rm /etc/puppet/modules
+	vzctl exec 101 git clone ${REPO} /opt/max/puppet-lan > /dev/null
+	vzctl exec 101 rm -r /etc/puppet/modules
 	vzctl exec 101 ln -s /opt/max/puppet-lan/modules /etc/puppet/modules
-	vzctl exec 101 rm /etc/puppet/manifests/site.pp
+	vzctl exec 101 rm -f /etc/puppet/manifests/site.pp
 	vzctl exec 101 ln -s /opt/max/puppet-lan/manifests/site.pp /etc/puppet/manifests/site.pp
 	vzctl exec 101 puppet agent
 }
 
 function init {
 	cluster_name=$1
-	password=$2
+	domain=$2
+	password=$3
 	
+	echo Updating master
 	rm -f /etc/apt/sources.list.d/pve-enterprise.list
-	apt-get update
-	apt-get --yes dist-upgrade
-
+	cat > /etc/resolv.conf << RESOLV
+search ${domain}
+domain ${domain}
+nameserver 8.8.8.8
+nameserver $(get_ip 102)
+RESOLV
+	
+	apt-get -qq update
+	apt-get -qq --yes dist-upgrade
+	
+	echo Downloading template
 	init_template
 
 	if [ ! -f /etc/pve/cluster.conf ]; then
 		echo "Creating cluster $cluster_name"
 		pvecm create "$cluster_name"
+	else
+		echo Cluster already exists
 	fi
+
+	init_vm_puppet ${password}
 }
 
 function join {
@@ -316,61 +343,14 @@ function join {
 
 case $subcommand in
 	init)
-		if [ $# -ne 3 ]; then
+		if [ $# -ne 4 ]; then
 			help
 		fi
 
-		init $2 $3
+		init $2 $3 $4
 		;;
 	*)
 		help
 		;;
 esac
-
-vzctl exec 111 puppet apply --debug /tmp/puppet
-
-for i in `seq 112 114`; do
-	vzctl exec $i "echo ${ip_range}.11 puppet >> /etc/hosts"
-	vzctl exec $i puppet agent --test
-done
-
-vzctl exec 111 puppet cert sign --all
-vzctl exec 112 puppet agent --test
-
-BASE=$(fetch ldap_base)
-
-cp /var/lib/vz/private/111/opt/max/puppet/defaults/ldap.ldif /var/lib/vz/private/112/tmp/ldap_raw.ldif
-vzctl exec 112 "sed -e \"s/{LDAP_BASE}/${BASE}/g\" /tmp/ldap_raw.ldif > /tmp/ldap.ldif"
-
-vzctl exec 112 ldapadd -Y EXTERNAL -H ldapi:/// -c -f /tmp/ldap.ldif
-
-for i in `seq 113 114`; do
-	vzctl exec $i puppet agent --test
-done
-
-if ! grep -q pve2ldap /etc/pve/user.cfg; then
-	pveum useradd pve2ldap@pve
-	echo 'pve2ldap:$5$oII+jhSZ$hmAGPbHpZzo7qqhqFfDiJpyX6.EZEgCQcx.eRjbkxl7:' > /etc/pve/priv/shadow.cfg
-	pveum aclmod / -roles PVEAuditor -users pve2ldap@pve
-fi
-
-# Add ns1 reference, add zone to ns1 and add dns entries again
-vzctl exec 113 /opt/max/pve2ldap/pve2ldap
-
-DOMAIN=$(fetch domain)
-
-cp /var/lib/vz/private/111/opt/max/puppet/defaults/dns.ldif /var/lib/vz/private/112/tmp/dns_raw.ldif
-vzctl exec 112 "sed -e \"s/{LDAP_BASE}/${BASE}/g\" -e \"s/{DOMAIN}/${DOMAIN}/g\" /tmp/dns_raw.ldif > /tmp/dns.ldif"
-
-vzctl exec 112 ldapadd -Y EXTERNAL -H ldapi:/// -c -f /tmp/dns.ldif
-vzctl exec 113 /opt/max/pve2ldap/pve2ldap
-
-vzctl exec 114 /usr/sbin/ldap2bind
-
-echo 'node "puppet" { include puppetmaster, puppet }' >> /var/lib/vz/private/111/etc/puppet/manifests/site.pp
-vzctl exec 111 puppet agent --test
-
-echo ""
-echo "Done!, please update the NS record of the zonefile and add other vpsses"
-
 exit 0
