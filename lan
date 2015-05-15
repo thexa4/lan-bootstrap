@@ -292,6 +292,7 @@ KEYFILE
 
 function init_vm_puppet {
 	password=$1
+	domain=$2
 	
 	create_vm puppet 101 ${password}
 	
@@ -304,6 +305,8 @@ function init_vm_puppet {
 	vzctl exec 101 ln -s /opt/max/puppet-lan/modules /etc/puppet/modules
 	vzctl exec 101 ln -s /opt/max/puppet-lan/hiera.yaml /etc/puppet/hiera.yaml
 	vzctl exec 101 ln -s /opt/max/puppet-lan/hieradata /etc/puppet/hieradata
+	
+	vzctl exec 101 "echo domain: ${domain} >> /etc/puppet/hieradata/local.yaml"
 	
 	vzctl exec 101 service puppetmaster restart
 	vzctl exec 101 puppet agent
@@ -336,7 +339,7 @@ RESOLV
 		echo Cluster already exists
 	fi
 
-	init_vm_puppet ${password}
+	init_vm_puppet ${password} ${domain}
 }
 
 function join {
