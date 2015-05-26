@@ -352,8 +352,8 @@ function init {
 	cat > /etc/resolv.conf << RESOLV
 search ${domain}
 domain ${domain}
-nameserver 8.8.8.8
 nameserver $(get_ip 102)
+nameserver 8.8.8.8
 RESOLV
 	
 	apt-get -qq update
