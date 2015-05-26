@@ -44,7 +44,7 @@ function add_host {
 	ip=$2
 	
 	if [ -f /etc/lan-master.conf ]; then
-		ssh "$master" "$dir/lan" add-host "$hostname" "$ip" "$password"
+		ssh "$master" "$dir/lan" add-host "$hostname" "$ip"
 	else
 		vzctl exec 101 "echo '    ${hostname}: ${ip}' >> /etc/puppet/hieradata/local.yaml"
 		puppet_run 102
