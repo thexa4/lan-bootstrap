@@ -1,46 +1,50 @@
-# = Definition: bind::key
-#
-# Helper to manage dns keys (NOT dnssec)
-# used mainly for nsupdate (dynamic updates)
-#
-# Arguments:
-#   *$secret*: key content
-#   *$algorithm*: key algorithm. Default hmac-md5
-#
-# This definition does NOT generate the key, please refer
-# to Bind9 documentation regarding dynamic update setup and
-# key pair generation.
-#
-define bind::key(
-  $secret,
-  $ensure    = present,
-  $algorithm = 'hmac-md5',
+# ex: syntax=puppet si ts=4 sw=4 et
+
+define bind::key (
+    $secret      = undef,
+    $secret_bits = 256,
+    $algorithm   = 'hmac-sha256',
+    $owner       = 'root',
+    $group       = $bind::params::bind_group,
+    $keydir      = $::bind::keydir::keydir,
+    $keyfile     = undef,
+    $include     = true,
 ) {
 
-  include ::bind::params
+    # Generate a key of size $secret_bits if no $secret
+    $secret_actual = $secret ? {
+        undef   => hmac_secret($secret_bits),
+        default => $secret,
+    }
 
-  validate_string($ensure)
-  validate_re($ensure, ['present', 'absent'],
-              "\$ensure must be either 'present' or 'absent', got '${ensure}'")
+    # Keep existing key if the module is generating a key
+    $replace = $secret ? {
+        undef   => false,
+        default => true,
+    }
 
-  validate_string($algorithm)
-  validate_string($secret)
+    # Use key name as key file name if none is supplied
+    $key_file_name = $keyfile ? {
+        undef   => $name,
+        default => $keyfile,
+    }
 
+    file { "${keydir}/${key_file_name}":
+        ensure  => present,
+        owner   => $owner,
+        group   => $group,
+        mode    => '0640',
+        replace => $replace,
+        content => template('bind/key.conf.erb'),
+    }
 
-  file {"${bind::params::keys_directory}/${name}.conf":
-    ensure  => $ensure,
-    mode    => '0600',
-    owner   => $bind::params::bind_user,
-    group   => $bind::params::bind_group,
-    content => template("${module_name}/dnskey.conf.erb"),
-  }
+    if $include and defined(Class['bind']) {
+        Package['bind'] -> File["${keydir}/${key_file_name}"] ~> Service['bind']
 
-  concat::fragment {"dnskey.${name}":
-    ensure  => $ensure,
-    target  => "${bind::params::config_base_dir}/${bind::params::named_local_name}",
-    content => "include \"${bind::params::keys_directory}/${name}.conf\";\n",
-    notify  => Exec['reload bind9'],
-    require => Package['bind9'],
-  }
-
+        concat::fragment { "bind-key-${name}":
+            order   => '10',
+            target  => "${bind::confdir}/keys.conf",
+            content => "include \"${keydir}/${key_file_name}\";\n",
+        }
+    }
 }
