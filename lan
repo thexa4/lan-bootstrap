@@ -42,8 +42,12 @@ function add_host {
 	hostname=$1
 	ip=$2
 	
-	vzctl exec 101 "echo '    ${hostname}: ${ip}' >> /etc/puppet/hieradata/local.yaml"
-	puppet_run 102
+	if [ -f /etc/lan-master.conf ]; then
+		ssh "$master" "$dir/lan" add-host "$hostname" "$ip"
+	else
+		vzctl exec 101 "echo '    ${hostname}: ${ip}' >> /etc/puppet/hieradata/local.yaml"
+		puppet_run 102
+	fi
 }
 
 function next_vmid {
@@ -399,14 +403,14 @@ function join {
 	fi
 	
 	init_template
-	pvecm join "$master"
+	pvecm add "$master"
 	echo "$master" > /etc/lan-master.conf
 	
 	ip=$(ip addr | grep $IP_RANGE | cut -f 6 -d' ' | cut -f 1 -d/)
 	hostname=$(hostname)
 	dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 	
-	ssh "$master" "$dir/lan" add-host "$hostname" "$ip" 
+	add_host "$hostname" "$ip" 
 }
 
 function add {
@@ -416,7 +420,6 @@ function add {
 	vmid=$(next_vmid)
 	
 	create_vm $hostname $vmid $password $disk
-	
 }
 
 case $subcommand in
