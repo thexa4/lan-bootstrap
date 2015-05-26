@@ -419,7 +419,8 @@ function add {
 	disk=$3
 	vmid=$(next_vmid)
 	
-	create_vm $hostname $vmid $password $disk
+	create_vm "$hostname" "$vmid" "$password" "$disk"
+	puppet_init $vmid
 }
 
 case $subcommand in
