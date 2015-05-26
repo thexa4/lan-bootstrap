@@ -254,7 +254,7 @@ function puppet_init {
 			break
 		fi
 	done
-	vzctl exec 101 puppet ca sign "${fqdn}"
+	vzctl exec 101 puppet ca sign "${fqdn}" > /dev/null
 	puppet_run $vmid
 }
 
