@@ -311,6 +311,7 @@ function init_vm_puppet {
 	
 	vzctl exec 101 ln -s /opt/max/puppet-lan/puppet.conf /etc/puppet/puppet.conf
 	vzctl exec 101 ln -s /opt/max/puppet-lan/modules /etc/puppet/modules
+	vzctl exec 101 ln -s /opt/max/puppet-lan/manifests/site.pp /etc/puppet/manifests/site.pp
 	vzctl exec 101 ln -s /opt/max/puppet-lan/hiera.yaml /etc/puppet/hiera.yaml
 	vzctl exec 101 ln -s /opt/max/puppet-lan/hieradata /etc/puppet/hieradata
 	

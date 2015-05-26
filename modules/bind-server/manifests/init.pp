@@ -18,7 +18,7 @@ class bind-server {
 		zone_type		=> master,
 		zone_contact	=> "hostmaster.$domain",
 		zone_ns			=> ["ns1.$domain."],
-		zone_ttl		=> 3600.
+		zone_ttl		=> 3600,
 	}
 	
 	define hieraHost {
