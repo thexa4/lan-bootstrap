@@ -443,7 +443,7 @@ case $subcommand in
 		add $2 $3 ${4:-16}
 		;;
 	add-host)
-		if [ $# -ne 3]; then
+		if [ $# -ne 3 ]; then
 			help
 		fi
 		add_host $2 $3
