@@ -1,140 +1,156 @@
-# ex: syntax=puppet si ts=4 sw=4 et
-
+# = Definition: bind::zone
+#
+# Creates a valid Bind9 zone.
+#
+# Arguments:
+#  *$is_slave*: Boolean. Is your zone a slave or a master? Default false
+#  *$transfer_source*: IPv4 address. Source IP to bind to when requesting a transfer (slave only)
+#  *$zone_ttl*: Time period. Time to live for your zonefile (master only)
+#  *$zone_contact*: Valid contact record (master only)
+#  *$zone_serial*: Integer. Zone serial (master only)
+#  *$zone_refresh*: Time period. Time between each slave refresh (master only)
+#  *$zone_retry*: Time period. Time between each slave retry (master only)
+#  *$zone_expiracy*: Time period. Slave expiracy time (master only)
+#  *$zone_ns*: Valid NS for this zone (master only)
+#  *$zone_xfers*: IPs. Valid xfers for zone (master only)
+#  *$zone_masters*: IPs. Valid master for this zone (slave only)
+#  *$zone_origin*: The origin of the zone
+#  *$zone_notify*: IPs to use for also-notify entry
+#
 define bind::zone (
-    $zone_type,
-    $domain          = '',
-    $dynamic         = true,
-    $masters         = '',
-    $transfer_source = '',
-    $allow_updates   = '',
-    $allow_transfers = '',
-    $dnssec          = false,
-    $key_directory   = '',
-    $ns_notify       = true,
-    $also_notify     = '',
-    $allow_notify    = '',
-    $forwarders      = '',
-    $forward         = '',
-    $source          = '',
+  $ensure          = present,
+  $is_dynamic      = false,
+  $is_slave        = false,
+  $allow_update    = [],
+  $transfer_source = undef,
+  $zone_ttl        = undef,
+  $zone_contact    = undef,
+  $zone_serial     = undef,
+  $zone_refresh    = '3h',
+  $zone_retry      = '1h',
+  $zone_expiracy   = '1w',
+  $zone_ns         = [],
+  $zone_xfers      = undef,
+  $zone_masters    = undef,
+  $zone_origin     = undef,
+  $zone_notify     = undef,
 ) {
-    # where there is a zone, there is a server
-    include bind
-    $cachedir = $::bind::cachedir
-    $_domain = pick($domain, $name)
 
-    unless !($masters != '' and ! member(['slave', 'stub'], $zone_type)) {
-        fail("masters may only be provided for bind::zone resources with zone_type 'slave' or 'stub'")
-    }
+  include ::bind::params
 
-    unless !($transfer_source != '' and ! member(['slave', 'stub'], $zone_type)) {
-        fail("transfer_source may only be provided for bind::zone resources with zone_type 'slave' or 'stub'")
-    }
+  validate_string($ensure)
+  validate_re($ensure, ['present', 'absent'],
+              "\$ensure must be either 'present' or 'absent', got '${ensure}'")
 
-    unless !($allow_updates != '' and ! $dynamic) {
-        fail("allow_updates may only be provided for bind::zone resources with dynamic set to true")
-    }
+  validate_bool($is_dynamic)
+  validate_bool($is_slave)
+  validate_array($allow_update)
+  validate_string($transfer_source)
+  validate_string($zone_ttl)
+  validate_string($zone_contact)
+  validate_string($zone_serial)
+  validate_string($zone_refresh)
+  validate_string($zone_retry)
+  validate_string($zone_expiracy)
+  validate_array($zone_ns)
+  validate_string($zone_origin)
 
-    unless !($dnssec and ! $dynamic) {
-        fail("dnssec may only be true for bind::zone resources with dynamic set to true")
-    }
+  if ($is_slave and $is_dynamic) {
+    fail "Zone '${name}' cannot be slave AND dynamic!"
+  }
 
-    unless !($key_directory != '' and ! $dnssec) {
-        fail("key_directory may only be provided for bind::zone resources with dnssec set to true")
-    }
+  if ($transfer_source and ! $is_slave) {
+    fail "Zone '${name}': transfer_source can be set only for slave zones!"
+  }
 
-    unless !($allow_notify != '' and ! member(['slave', 'stub'], $zone_type)) {
-        fail("allow_notify may only be provided for bind::zone resources with zone_type 'slave' or 'stub'")
-    }
+  concat::fragment {"named.local.zone.${name}":
+    ensure  => $ensure,
+    target  => "${bind::params::config_base_dir}/${bind::params::named_local_name}",
+    content => "include \"${bind::params::zones_directory}/${name}.conf\";\n",
+    notify  => Exec['reload bind9'],
+    require => Package['bind9'],
+  }
 
-    unless !($forwarders != '' and $zone_type != 'forward') {
-        fail("forwarders may only be provided for bind::zone resources with zone_type 'forward'")
-    }
+  case $ensure {
+    'present': {
+      concat {"${bind::params::zones_directory}/${name}.conf":
+        owner  => root,
+        group  => root,
+        mode   => '0644',
+        notify => Exec['reload bind9'],
+      }
+      concat::fragment {"bind.zones.${name}":
+        ensure  => $ensure,
+        target  => "${bind::params::zones_directory}/${name}.conf",
+        notify  => Exec['reload bind9'],
+        require => Package['bind9'],
+      }
 
-    unless !($forward != '' and $zone_type != 'forward') {
-        fail("forward may only be provided for bind::zone resources with zone_type 'forward'")
-    }
 
-    unless !($source != '' and ! member(['master', 'hint'], $zone_type)) {
-        fail("source may only be provided for bind::zone resources with zone_type 'master' or 'hint'")
-    }
+      if $is_slave {
+        Concat::Fragment["bind.zones.${name}"] {
+          content => template('bind/zone-slave.erb'),
+        }
+## END of slave
+      } else {
+        validate_re($zone_contact, '^\S+$', "Wrong contact value for ${name}!")
+        validate_slength($zone_ns, 255, 3)
+        validate_re($zone_serial, '^\d+$', "Wrong serial value for ${name}!")
+        validate_re($zone_ttl, '^\d+$', "Wrong ttl value for ${name}!")
 
-    $zone_file_mode = $zone_type ? {
-        'master' => $dynamic ? {
-            true  => 'init',
-            false => 'managed',
-        },
-        'slave'  => 'allowed',
-        'hint'   => 'managed',
-        'stub'   => 'allowed',
-        default  => 'absent',
-    }
-
-    if member(['init', 'managed', 'allowed'], $zone_file_mode) {
-        file { "${cachedir}/${name}":
-            ensure  => directory,
-            owner   => $::bind::params::bind_user,
-            group   => $::bind::params::bind_group,
-            mode    => '0755',
-            require => Package['bind'],
+        $conf_file = $is_dynamic? {
+          true    => "${bind::params::dynamic_directory}/${name}.conf",
+          default => "${bind::params::pri_directory}/${name}.conf",
         }
 
-        if member(['init', 'managed'], $zone_file_mode) {
-            file { "${cachedir}/${name}/${_domain}":
-                ensure  => present,
-                owner   => $::bind::params::bind_user,
-                group   => $::bind::params::bind_group,
-                mode    => '0644',
-                replace => ($zone_file_mode == 'managed'),
-                source  => pick($source, 'puppet:///modules/bind/db.empty'),
-                audit   => [ content ],
-            }
+        $require = $is_dynamic? {
+          true    => Bind::Key[$allow_update],
+          default => undef,
         }
 
-        if $zone_file_mode == 'managed' {
-            exec { "rndc reload ${_domain}":
-                command     => "/usr/sbin/rndc reload ${_domain}",
-                user        => $::bind::params::bind_user,
-                refreshonly => true,
-                require     => Service['bind'],
-                subscribe   => File["${cachedir}/${name}/${_domain}"],
-            }
+        if $is_dynamic {
+          file {$conf_file:
+            owner   => root,
+            group   => $bind::params::bind_group,
+            mode    => '0664',
+            replace => false,
+            content => template('bind/zone-header.erb'),
+            notify  => Exec['reload bind9'],
+            require => [Package['bind9'], $require],
+          }
+        } else {
+          concat {$conf_file:
+            owner   => root,
+            group   => $bind::params::bind_group,
+            mode    => '0664',
+            notify  => Exec['reload bind9'],
+            require => Package['bind9'],
+          }
+
+          concat::fragment {"00.bind.${name}":
+            ensure  => $ensure,
+            target  => $conf_file,
+            content => template('bind/zone-header.erb'),
+          }
         }
-    } elsif $zone_file_mode == 'absent' {
-        file { "${cachedir}/${name}":
-            ensure => absent,
+
+        Concat::Fragment["bind.zones.${name}"] {
+          content => template('bind/zone-master.erb'),
         }
+
+        file {"${bind::params::pri_directory}/${name}.conf.d":
+          ensure  => absent,
+        }
+      }
     }
-
-    if $dnssec {
-        exec { "dnssec-keygen-${name}":
-            command => "/usr/local/bin/dnssec-init '${cachedir}' '${name}'\
-                '${_domain}' '${key_directory}'",
-            cwd     => $cachedir,
-            user    => $::bind::params::bind_user,
-            creates => "${cachedir}/${name}/${_domain}.signed",
-            timeout => 0, # crypto is hard
-            require => [
-                File['/usr/local/bin/dnssec-init'],
-                File["${cachedir}/${name}/${_domain}"]
-            ],
-        }
-
-        file { "${cachedir}/${name}/${_domain}.signed":
-            owner => $::bind::params::bind_user,
-            group => $::bind::params::bind_group,
-            mode  => '0644',
-            audit => [ content ],
-        }
+    'absent': {
+      file {"${bind::params::pri_directory}/${name}.conf":
+        ensure => absent,
+      }
+      file {"${bind::params::zones_directory}/${name}.conf":
+        ensure => absent,
+      }
     }
-
-    file { "${::bind::confdir}/zones/${name}.conf":
-        ensure  => present,
-        owner   => 'root',
-        group   => $::bind::params::bind_group,
-        mode    => '0644',
-        content => template('bind/zone.conf.erb'),
-        notify  => Service['bind'],
-        require => Package['bind'],
-    }
-
+    default: {}
+  }
 }
