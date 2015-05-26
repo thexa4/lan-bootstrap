@@ -1,4 +1,8 @@
 class bind-server {
+	Exec {
+		path => '/bin;/sbin;/usr/bin;/usr/sbin',
+	}
+
 	$domain = hiera('domain')
 	$hosts = hiera_hash('hosts')
 	
