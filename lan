@@ -21,7 +21,9 @@ TEMPLATE_NAME=debian-${DEBIAN_VERSION}.0-x86-minimal.tar.gz
 subcommand=${1:-help}
 
 function help {
-	echo "Usage: $0 init cluster_name domain container_root_pw"
+	echo "Usage:
+	echo "$0 init cluster_name domain container_root_pw"
+	echo "$0 join master_hostname"
 	exit 1
 }
 
@@ -384,6 +386,12 @@ case $subcommand in
 		fi
 
 		init $2 $3 $4
+		;;
+	join)
+		if [ $# -ne 2 ]; then
+			help
+		fi
+		join $2
 		;;
 	*)
 		help
