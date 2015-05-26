@@ -46,6 +46,10 @@ function add_host {
 	puppet_run 102
 }
 
+function next_vmid {
+	pvesh get /cluster/nextid 2>/dev/null | cut -f 2 -d\"
+}
+
 # Creates and initializes a container with puppet
 function create_vm {
 	hostname=$1
@@ -402,11 +406,12 @@ function join {
 	hostname=$(hostname)
 	dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 	
-	ssh "$master" "$dir/lan" add-host "$hostname" $ip" 
+	ssh "$master" "$dir/lan" add-host "$hostname" "$ip" 
 }
 
 function add {
 	hostname=$1
+	vmid=$(next_vmid)
 	
 	
 }
