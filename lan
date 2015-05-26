@@ -246,7 +246,14 @@ function puppet_init {
 	
 	fqdn=$(vzctl exec ${vmid} 'hostname --fqdn')
 	vzctl exec ${vmid} puppet agent
-	sleep 5
+	echo "Waiting for request file"
+	for i in $(seq 1 30)
+	do
+		sleep 1
+		if vzctl exec 101 stat "/var/lib/puppet/ssl/ca/requests/${fqdn}.pem"; do
+			break
+		fi
+	done
 	vzctl exec 101 puppet ca sign "${fqdn}"
 	puppet_run $vmid
 }
