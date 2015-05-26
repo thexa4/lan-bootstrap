@@ -1,43 +1,31 @@
-# = Class: bind::params
-# Setup parameters based on OS
-# You should NOT include this class as is, as it won't work at all!
-# Please refer to Class['bind'].
+# ex: syntax=puppet si ts=4 sw=4 et
 
-class bind::params {
+class bind::params (
+    $supported,
+    $bind_user,
+    $bind_group,
+    $bind_package,
+    $bind_service,
+    $nsupdate_package,
+) {
+    unless $supported {
+        fail('Platform is not supported')
+    }
+
     if $::osfamily == 'Debian' {
-        $package_name         = 'bind9'
-        $service_name         = 'bind9'
-        $bind_user            = 'bind'
-        $bind_group           = 'bind'
-        $service_has_status   = true
-        #$service_pattern will only be used if $service_has_status is false
-        $service_pattern      = undef
-        $service_restart      = '/etc/init.d/bind9 reload'
-        $config_base_dir      = '/etc/bind'
-        $named_conf_name      = 'named.conf'
-        $named_local_name     = 'named.conf.local'
-        $zones_directory      = '/etc/bind/zones'
-        $pri_directory        = '/etc/bind/pri'
-        $keys_directory       = '/etc/bind/keys'
-        $dynamic_directory    = '/etc/bind/dynamic'
+        $bind_files = [
+            "${::bind::confdir}/bind.keys",
+            "${::bind::confdir}/db.empty",
+            "${::bind::confdir}/db.local",
+            "${::bind::confdir}/db.root",
+            "${::bind::confdir}/db.0",
+            "${::bind::confdir}/db.127",
+            "${::bind::confdir}/db.255",
+            "${::bind::confdir}/named.conf.default-zones",
+            "${::bind::confdir}/zones.rfc1918",
+        ]
     }
     elsif $::osfamily == 'RedHat' {
-        $package_name         = 'bind'
-        $service_name         = 'named'
-        $bind_user            = 'named'
-        $bind_group           = 'named'
-        $service_has_status   = true
-        $service_pattern      = undef
-        $service_restart      = '/etc/init.d/named reload'
-        $config_base_dir      = '/etc'
-        $named_conf_name      = 'named.conf'
-        $named_local_name     = 'named.conf.local'
-        $zones_directory      = '/etc/named/zones'
-        $pri_directory        = '/etc/named/pri'
-        $keys_directory       = '/etc/named/keys'
-        $dynamic_directory    = '/etc/named/dynamic'
-    }
-    else {
-        fail "Unknown ${::operatingsystem}"
+        $bind_files = ['/etc/named.root.key']
     }
 }
