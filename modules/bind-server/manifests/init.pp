@@ -23,13 +23,13 @@ class bind-server {
 		$ip = $hosts[$name]
 		$domain = hiera('domain')
 		
-		bind::a { "$name.bolklan.nl.":
+		bind::a { "$name.$domain.":
 			ensure => present,
 			zone => $domain,
 			ptr	=> true,
 			zone_arpa => "1.168.192.in-addr.arpa",
 			hash_data => {
-				"default" => { owner => $ip, },
+				$name => { owner => $ip, },
 			},
 		}
 	}
