@@ -2,11 +2,6 @@ class bind-server {
 	$domain = hiera('domain')
 	$hosts = hiera_hash('hosts')
 	
-	bind::view { "all":
-		recursion	=> true,
-		zones		=> ["$domain", "1.168.192.in-addr.arpa"],
-	}
-	
 	bind::zone { "1.168.192.in-addr.arpa":
 		zone_contact	=> "hostmaster.$domain",
 		zone_ns			=> ['ns1'],
