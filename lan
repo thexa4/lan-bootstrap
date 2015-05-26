@@ -380,6 +380,10 @@ RESOLV
 
 	init_vm_puppet ${password} ${domain}
 	init_vm_ns1 ${password} ${domain}
+	
+	ip=$(ip addr | grep $IP_RANGE | cut -f 6 -d' ' | cut -f 1 -d/)
+	hostname=$(hostname)
+	add_host "$hostname" "$ip"
 }
 
 function join {
@@ -393,6 +397,12 @@ function join {
 	init_template
 	pvecm join "$master"
 	echo "$master" > /etc/lan-master.conf
+	
+	ip=$(ip addr | grep $IP_RANGE | cut -f 6 -d' ' | cut -f 1 -d/)
+	hostname=$(hostname)
+	dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+	
+	ssh "$master" "$dir/lan" add-host "$hostname" $ip" 
 }
 
 function add {
@@ -420,6 +430,12 @@ case $subcommand in
 			help
 		fi
 		add $2
+		;;
+	add-host)
+		if [ $# -e 3]; then
+			help
+		fi
+		add_host $2 $3
 		;;
 	*)
 		help
