@@ -24,7 +24,7 @@ function help {
 	echo "Usage:"
 	echo "  $0 init cluster_name domain container_root_pw"
 	echo "  $0 join master_hostname"
-	echo "  $0 add hostname"
+	echo "  $0 add hostname password"
 	exit 1
 }
 
@@ -437,7 +437,7 @@ case $subcommand in
 		join $2
 		;;
 	add)
-		if [ $# -ne 3] && [ $# -ne 4 ]; then
+		if [ $# -ne 3 ] && [ $# -ne 4 ]; then
 			help
 		fi
 		add $2 $3 ${4:-16}
