@@ -39,12 +39,17 @@ function get_ip {
 	echo ${IP_RANGE}${vmid}
 }
 
+function master_do {
+	dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+	ssh "$master" "$dir/lan" $@
+}
+
 function add_host {
 	hostname=$1
 	ip=$2
 	
 	if [ -f /etc/lan-master.conf ]; then
-		ssh "$master" "$dir/lan" add-host "$hostname" "$ip"
+		master_do add-host "$hostname" "$ip"
 	else
 		vzctl exec 101 "echo '    ${hostname}: ${ip}' >> /etc/puppet/hieradata/local.yaml"
 		puppet_run 102
@@ -271,7 +276,7 @@ function puppet_init {
 	vzctl exec ${vmid} puppet agent
 	
 	if [ -f /etc/lan-master.conf ]; then
-		ssh "$master" "$dir/lan" sign "$fqdn"
+		master_do sign "$fqdn"
 	else
 		sign "$fqdn"
 	fi
@@ -420,7 +425,6 @@ function join {
 	
 	ip=$(ip addr | grep $IP_RANGE | cut -f 6 -d' ' | cut -f 1 -d/)
 	hostname=$(hostname)
-	dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 	
 	add_host "$hostname" "$ip" 
 }
