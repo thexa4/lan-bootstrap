@@ -26,9 +26,11 @@ class bind-server {
 		bind::a { "$name.bolklan.nl.":
 			ensure => present,
 			zone => $domain,
-			
+			ptr	=> true,
 			zone_arpa => "1.168.192.in-addr.arpa",
-			hash_data => { owner => $ip, },
+			hash_data => {
+				"default" => { owner => $ip, },
+			},
 		}
 	}
 	
