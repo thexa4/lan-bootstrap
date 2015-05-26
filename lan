@@ -253,7 +253,7 @@ function puppet_init {
 	for i in $(seq 1 30)
 	do
 		sleep 1
-		if vzctl exec 101 stat "/var/lib/puppet/ssl/ca/requests/${fqdn}.pem"; then
+		if vzctl exec 101 stat "/var/lib/puppet/ssl/ca/requests/${fqdn}.pem" 2>/dev/null > /dev/null; then
 			break
 		fi
 	done
