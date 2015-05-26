@@ -22,8 +22,9 @@ subcommand=${1:-help}
 
 function help {
 	echo "Usage:"
-	echo "$0 init cluster_name domain container_root_pw"
-	echo "$0 join master_hostname"
+	echo "  $0 init cluster_name domain container_root_pw"
+	echo "  $0 join master_hostname"
+	echo "  $0 add hostname"
 	exit 1
 }
 
@@ -35,6 +36,14 @@ function fetch {
 function get_ip {
 	vmid=$1
 	echo ${IP_RANGE}${vmid}
+}
+
+function add_host {
+	hostname=$1
+	ip=$2
+	
+	vzctl exec 101 "echo '    ${hostname}: ${ip}' >> /etc/puppet/hieradata/local.yaml"
+	puppet_run 102
 }
 
 # Creates and initializes a container with puppet
@@ -236,7 +245,7 @@ PUPPETKEY
 	vzctl exec ${vmid} apt-get -qq --yes install puppet > /dev/null
 	
 	echo Adding to hosts list
-	vzctl exec 101 "echo '    ${hostname}: ${ip}' >> /etc/puppet/hieradata/local.yaml" || true
+	add_host "${hostname}" "${ip}" || true
 	echo Finished initialization of ${hostname}
 }
 
@@ -376,9 +385,20 @@ RESOLV
 function join {
 	master=$1
 	
-	init_template
+	if [ -f /etc/pve/cluster.conf ]; then
+		echo "Already in cluster!"
+		exit 1;
+	fi
 	
+	init_template
 	pvecm join "$master"
+	echo "$master" > /etc/lan-master.conf
+}
+
+function add {
+	hostname=$1
+	
+	
 }
 
 case $subcommand in
@@ -396,6 +416,10 @@ case $subcommand in
 		join $2
 		;;
 	add)
+		if [ $# -ne 2]; then
+			help
+		fi
+		add $2
 		;;
 	*)
 		help
