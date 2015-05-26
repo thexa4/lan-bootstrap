@@ -40,6 +40,7 @@ function get_ip {
 }
 
 function master_do {
+	master=$(cat /etc/lan-master.conf)
 	dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 	ssh "$master" "$dir/lan" $@
 }
