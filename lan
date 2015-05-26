@@ -411,8 +411,11 @@ function join {
 
 function add {
 	hostname=$1
+	password=$2
+	disk=$3
 	vmid=$(next_vmid)
 	
+	create_vm $hostname $vmid $password $disk
 	
 }
 
@@ -431,13 +434,13 @@ case $subcommand in
 		join $2
 		;;
 	add)
-		if [ $# -ne 2]; then
+		if [ $# -ne 3] && [ $# -ne 4]; then
 			help
 		fi
-		add $2
+		add $2 $3 ${4:-16}
 		;;
 	add-host)
-		if [ $# -e 3]; then
+		if [ $# -ne 3]; then
 			help
 		fi
 		add_host $2 $3
