@@ -21,7 +21,7 @@ TEMPLATE_NAME=debian-${DEBIAN_VERSION}.0-x86-minimal.tar.gz
 subcommand=${1:-help}
 
 function help {
-	echo "Usage:
+	echo "Usage:"
 	echo "$0 init cluster_name domain container_root_pw"
 	echo "$0 join master_hostname"
 	exit 1
