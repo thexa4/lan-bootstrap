@@ -27,6 +27,7 @@ class bind-server {
 			ensure => present,
 			zone => $domain,
 			ptr	=> true,
+			zone_arpa => "1.168.192.in-addr.arpa",
 			hash_data => { owner => $ip, },
 		}
 	}
