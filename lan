@@ -232,6 +232,9 @@ PUPPETKEY
 	echo Installing puppet on ${hostname}
 	vzctl exec ${vmid} apt-get -qq update
 	vzctl exec ${vmid} apt-get -qq --yes install puppet > /dev/null
+	
+	echo Adding to hosts list
+	vzctl exec 101 "echo '    ${hostname}: ${ip}' >> /etc/puppet/hieradata/local.yaml" || true
 	echo Finished initialization of ${hostname}
 }
 
@@ -250,7 +253,7 @@ function puppet_init {
 	for i in $(seq 1 30)
 	do
 		sleep 1
-		if vzctl exec 101 stat "/var/lib/puppet/ssl/ca/requests/${fqdn}.pem"; do
+		if vzctl exec 101 stat "/var/lib/puppet/ssl/ca/requests/${fqdn}.pem"; then
 			break
 		fi
 	done
@@ -315,10 +318,15 @@ function init_vm_puppet {
 	vzctl exec 101 ln -s /opt/max/puppet-lan/hiera.yaml /etc/puppet/hiera.yaml
 	vzctl exec 101 ln -s /opt/max/puppet-lan/hieradata /etc/puppet/hieradata
 	
-	vzctl exec 101 "echo domain: ${domain} >> /etc/puppet/hieradata/local.yaml"
+	# Reset local config
+	vzctl exec 101 "echo domain: ${domain} > /etc/puppet/hieradata/local.yaml"
 	
 	vzctl exec 101 service puppetmaster restart
 	vzctl exec 101 puppet agent
+	
+	ip=$(get_ip 101)
+	vzctl exec 101 "echo hosts: >> /etc/puppet/hieradata/local.yaml"
+	vzctl exec 101 "echo '    puppet: ${ip}' >> /etc/puppet/hieradata/local.yaml"
 }
 
 function init_vm_ns1 {
