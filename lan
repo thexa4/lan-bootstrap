@@ -377,6 +377,8 @@ function join {
 	master=$1
 	
 	init_template
+	
+	pvecm join "$master"
 }
 
 case $subcommand in
@@ -392,6 +394,8 @@ case $subcommand in
 			help
 		fi
 		join $2
+		;;
+	add)
 		;;
 	*)
 		help
