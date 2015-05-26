@@ -19,7 +19,7 @@ class bind-server {
 			ensure => present,
 			zone => $domain,
 			ptr	=> true,
-			data => { owner => $ip, },
+			data_hash => { owner => $ip, },
 		}
 	}
 	
