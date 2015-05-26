@@ -7,29 +7,24 @@ class bind-server {
 		zones		=> ["$domain", "1.168.192.in-addr.arpa"],
 	}
 	
-	bind::zone { $domain:
-		zone_type		=> master,
+	bind::zone { "1.168.192.in-addr.arpa":
 		zone_contact	=> "hostmaster.$domain",
 		zone_ns			=> ['ns1'],
+		zone_serial		=> 42,
 		zone_ttl		=> 3600,
-	}
-	
-	bind::zone { "1.168.192.in-addr.arpa":
-		zone_type		=> master,
-		zone_contact	=> "hostmaster.$domain",
-		zone_ns			=> ["ns1.$domain."],
-		zone_ttl		=> 3600,
+		zone_origin		=> "1.168.192.in-addr.arpa",
 	}
 	
 	define hieraHost {
 		$hosts = hiera_hash('hosts')
 		$ip = $hosts[$name]
+		$domain = hiera('domain')
 		
-		resource_record { "$name.bolklan.nl.":
+		bind::a { "$name.bolklan.nl.":
 			ensure => present,
-			record => "$name.bolklan.nl",
-			type => "A",
-			data => $ip,
+			zone => $domain,
+			ptr	=> true,
+			data => { owner => $ip, },
 		}
 	}
 	
