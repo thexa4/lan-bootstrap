@@ -25,6 +25,7 @@ function help {
 	echo "  $0 init cluster_name domain container_root_pw"
 	echo "  $0 join master_hostname"
 	echo "  $0 add hostname password"
+	echo "  $0 sign fqdn"
 	exit 1
 }
 
@@ -268,6 +269,19 @@ function puppet_init {
 	
 	fqdn=$(vzctl exec ${vmid} 'hostname --fqdn')
 	vzctl exec ${vmid} puppet agent
+	
+	if [ -f /etc/lan-master.conf ]; then
+		ssh "$master" "$dir/lan" sign "$fqdn"
+	else
+		sign "$fqdn"
+	fi
+	
+	sleep 5
+	puppet_run $vmid
+}
+
+function sign {
+	fqdn=$1
 	echo "Waiting for request file"
 	for i in $(seq 1 30)
 	do
@@ -277,8 +291,6 @@ function puppet_init {
 		fi
 	done
 	vzctl exec 101 puppet ca sign "${fqdn}" > /dev/null
-	sleep 5
-	puppet_run $vmid
 }
 
 function init_template {
@@ -448,6 +460,12 @@ case $subcommand in
 			help
 		fi
 		add_host $2 $3
+		;;
+	sign)
+		if [ $# -ne 2 ]; then
+			help
+		fi
+		sign $2
 		;;
 	*)
 		help
