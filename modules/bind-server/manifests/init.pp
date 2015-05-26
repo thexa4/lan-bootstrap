@@ -3,10 +3,11 @@ class bind-server {
 	$hosts = hiera_hash('hosts')
 	
 	bind::zone { $domain:
-		zone_type		=> master,
 		zone_contact	=> "hostmaster.$domain",
 		zone_ns			=> ['ns1'],
+		zone_serial		=> 42,
 		zone_ttl		=> 3600,
+		zone_origin		=> $domain,
 	}
 	
 	bind::zone { "1.168.192.in-addr.arpa":
