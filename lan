@@ -276,7 +276,7 @@ function puppet_init {
 	local vmid=$1
 	
 	local fqdn=$(vzctl exec ${vmid} 'hostname --fqdn')
-	vzctl exec ${vmid} puppet agent --test | true
+	vzctl exec ${vmid} puppet agent --test || true
 	
 	if [ -f /etc/lan-master.conf ]; then
 		master_do sign "$fqdn"
