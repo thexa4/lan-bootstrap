@@ -36,7 +36,7 @@ class cache {
 	exec { "install nginx key":
 		command => "/usr/bin/apt-key add /root/nginx.key",
 		unless => "/usr/bin/apt-key list | /bin/grep -q Nginx",
-		require => File["/etc/nginx/nginx.key"],
+		require => File["/root/nginx.key"],
 	}
 	
 	file { "/etc/apt/sources.list.d/nginx.list":
