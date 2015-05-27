@@ -297,7 +297,7 @@ function sign {
 		fi
 	done
 	vzctl exec 101 puppet ca sign "${fqdn}" > /dev/null
-	echo "Waiting for signed certificate...
+	echo "Waiting for signed certificate..."
 	for i in $(seq 1 60)
 	do
 		sleep 1
