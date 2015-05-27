@@ -456,7 +456,8 @@ function clean {
 	else
 		
 		local hostname=$(echo $fqdn | cut -f1 -d.)
-		
+		local ip=$(getent hosts $fqdn | cut -f1 -d' ')
+			
 		cat > /var/lib/vz/private/101/tmp/clean-$vmid.puppet << MANIFEST
 file { "/var/lib/puppet/request/$fqdn":
 	ensure => absent,
@@ -469,8 +470,7 @@ file { "/var/lib/puppet/signed/$fqdn":
 file_line { "hostline":
 	path => "/etc/puppet/hieradata/local.yaml",
 	ensure => absent,
-	line => "    $hostname",
-	match => "^    $hostname:",
+	line => "    $hostname: $ip",
 	multiple => true,
 }
 MANIFEST
