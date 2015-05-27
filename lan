@@ -448,8 +448,8 @@ function destroy {
 }
 
 function clean {
-	local $vmid=$1
-	local $fqdn=$2
+	local vmid=$1
+	local fqdn=$2
 	
 	if [ -f /etc/lan-master.conf ]; then
 		master_do clean "$vmid"
