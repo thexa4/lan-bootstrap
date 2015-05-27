@@ -41,6 +41,7 @@ class cache {
 	
 	exec { "refresh apt-get nginx":
 		command => "/usr/bin/apt-get update",
+		refreshonly => true,
 	}
 	
 	$www_list = [ '/data', '/data/www', '/data/www/cache',  '/data/www/cache/tmp', '/data/www/cache/installs',  '/data/www/cache/other', '/data/www/cache/steam' ]
