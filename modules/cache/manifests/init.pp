@@ -14,7 +14,7 @@ class cache {
 	file { "/etc/nginx/conf.d/steam":
 		ensure => present,
 		source => "puppet:///modules/cache/steam",
-		require => Package["nginx"],
+		require => [ Package["nginx"], File["/etc/nginx/lancache"] ],
 		notify => Service["nginx"],
 	}
 	
