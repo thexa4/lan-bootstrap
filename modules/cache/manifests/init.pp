@@ -28,13 +28,13 @@ class cache {
 		require => Package["nginx"],
 	}
 	
-	file { "/etc/nginx/nginx.key":
+	file { "/root/nginx.key":
 		ensure => file,
 		source => "puppet:///modules/cache/nginx.key",
 	}
 	
 	exec { "install nginx key":
-		command => "/usr/bin/apt-key add /etc/nginx/nginx.key",
+		command => "/usr/bin/apt-key add /root/nginx.key",
 		unless => "/usr/bin/apt-key list | /bin/grep -q Nginx",
 		require => File["/etc/nginx/nginx.key"],
 	}
