@@ -4,9 +4,10 @@ class cache {
 		require => [ File["/etc/apt/sources.list.d/nginx.list"], Exec["refresh apt-get nginx"] ],
 	}
 	
-	exec { "download nginx-cache config":
-		command => "/usr/bin/wget -qO- http://blog.multiplay.co.uk/dropzone/lancache-386.tgz | gunzip | /bin/tar -xC /etc/nginx/ lancache",
-		unless => "/usr/bin/test -d /etc/nginx/lancache",
+	file { "/etc/nginx/lancache":
+		ensure => directory,
+		source => "puppet://modules/cache/lancache/lancache",
+		recurse => true,
 		require => Package["nginx"],
 	}
 	
