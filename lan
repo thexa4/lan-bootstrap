@@ -444,7 +444,19 @@ function join {
 }
 
 function destroy {
-	echo ""
+	local vmid=$1
+	local fqdn=$(vzctl exec "$vmid" hostname --fqdn)
+	
+	printf "Are you sure you want to destroy ct $vmid ($fqdn) [y/N]? "
+	read line
+	
+	if [ "$line" = "y" ]; then
+		vzctl stop "$vmid"
+		vzctl destroy "$vmid"
+		clean "$vmid" "$fqdn"
+	else
+		exit 1
+	fi
 }
 
 function clean {
@@ -452,7 +464,7 @@ function clean {
 	local fqdn=$2
 	
 	if [ -f /etc/lan-master.conf ]; then
-		master_do clean "$vmid"
+		master_do clean "$vmid" "$fqdn"
 	else
 		
 		local hostname=$(echo $fqdn | cut -f1 -d.)
