@@ -11,11 +11,15 @@ class cache {
 		require => Package["nginx"],
 	}
 	
-	file { "/etc/nginx/conf.d/steam":
+	file { "/etc/nginx/conf.d/steam.conf":
 		ensure => present,
-		source => "puppet:///modules/cache/steam",
+		source => "puppet:///modules/cache/steam.conf",
 		require => [ Package["nginx"], File["/etc/nginx/lancache"] ],
 		notify => Service["nginx"],
+	}
+	
+	file { "/etc/nginx/conf.d/default.conf":
+		ensure => absent,
 	}
 	
 	service { "nginx":
@@ -47,8 +51,8 @@ class cache {
 
 	file { $www_list:
 	  ensure => directory,
-	  owner  => 'www-data',
-	  group  => 'www-data',
+	  owner  => 'nginx',
+	  group  => 'nginx',
 	  before => Service['nginx'],
 	}
 	
