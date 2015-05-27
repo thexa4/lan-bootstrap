@@ -444,11 +444,11 @@ function join {
 
 function destroy {
 	local vmid=$1
-	local fqdn=$(vzctl exec "$vmid" hostname --fqdn)
 	
-	if [ $? -ne 0 ]; then
-		exit 1;
-	fi
+	# Check for existence
+	vzctl exec "$vmid" exit || exit 1
+	
+	local fqdn=$(vzctl exec "$vmid" hostname --fqdn)
 	
 	printf "Are you sure you want to destroy ct $vmid ($fqdn) [y/N]? "
 	read line
