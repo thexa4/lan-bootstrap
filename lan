@@ -268,15 +268,15 @@ PUPPETKEY
 
 function puppet_run {
 	local vmid=$1
-	
-	vzctl exec ${vmid} puppet agent
+	echo "Running puppet on $vmid"
+	vzctl exec ${vmid} puppet agent --test
 }
 
 function puppet_init {
 	local vmid=$1
 	
 	local fqdn=$(vzctl exec ${vmid} 'hostname --fqdn')
-	vzctl exec ${vmid} puppet agent --test || true
+	vzctl exec ${vmid} puppet agent || true
 	
 	if [ -f /etc/lan-master.conf ]; then
 		master_do sign "$fqdn"
@@ -299,7 +299,7 @@ function sign {
 			break
 		fi
 	done
-	vzctl exec 101 puppet ca sign "${fqdn}"
+	vzctl exec 101 puppet ca sign "${fqdn}" > /dev/null
 	echo "Waiting for signed certificate..."
 	for i in $(seq 1 60)
 	do
