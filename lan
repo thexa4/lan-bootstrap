@@ -274,7 +274,7 @@ function puppet_init {
 	vmid=$1
 	
 	fqdn=$(vzctl exec ${vmid} 'hostname --fqdn')
-	vzctl exec ${vmid} puppet agent
+	vzctl exec ${vmid} puppet agent --test
 	
 	if [ -f /etc/lan-master.conf ]; then
 		master_do sign "$fqdn"
@@ -287,6 +287,7 @@ function puppet_init {
 
 function sign {
 	fqdn=$1
+	echo "Signing $fqdn"
 	echo "Waiting for request file..."
 	for i in $(seq 1 60)
 	do
@@ -447,6 +448,7 @@ function add {
 	
 	create_vm "$hostname" "$vmid" "$password" "$disk"
 	puppet_init $vmid
+	puppet_run $vmid
 }
 
 case $subcommand in
