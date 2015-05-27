@@ -30,24 +30,24 @@ function help {
 }
 
 function fetch {
-	param="$1"
+	local param="$1"
 	vzctl exec 101 hiera -c /etc/puppet/hiera.yaml "$param"
 }
 
 function get_ip {
-	vmid=$1
+	local vmid=$1
 	echo ${IP_RANGE}${vmid}
 }
 
 function master_do {
-	master=$(cat /etc/lan-master.conf)
-	dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+	local master=$(cat /etc/lan-master.conf)
+	local dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 	ssh "$master" "$dir/lan" $@
 }
 
 function add_host {
-	hostname=$1
-	ip=$2
+	local hostname=$1
+	local ip=$2
 	
 	if [ -f /etc/lan-master.conf ]; then
 		master_do add-host "$hostname" "$ip"
@@ -63,12 +63,12 @@ function next_vmid {
 
 # Creates and initializes a container with puppet
 function create_vm {
-	hostname=$1
-	vmid=$2
-	password=$3
-	disk=${4:-16}
+	local hostname=$1
+	local vmid=$2
+	local password=$3
+	local disk=${4:-16}
 	
-	ip=$(get_ip $vmid)
+	local ip=$(get_ip $vmid)
 	
 	echo "Creating ct ${hostname} (vmid: ${vmid}, disk: ${disk}, ip: ${ip})"
 	pvectl create ${vmid} /var/lib/vz/template/cache/${TEMPLATE_NAME} -disk ${disk} -hostname ${hostname} -ip_address ${ip} -onboot 1 -password ${password} > /dev/null
@@ -265,15 +265,15 @@ PUPPETKEY
 }
 
 function puppet_run {
-	vmid=$1
+	local vmid=$1
 	
 	vzctl exec ${vmid} puppet agent
 }
 
 function puppet_init {
-	vmid=$1
+	local vmid=$1
 	
-	fqdn=$(vzctl exec ${vmid} 'hostname --fqdn')
+	local fqdn=$(vzctl exec ${vmid} 'hostname --fqdn')
 	echo $fqdn $vmid
 	vzctl exec ${vmid} puppet agent --test
 	
@@ -287,7 +287,7 @@ function puppet_init {
 }
 
 function sign {
-	fqdn=$1
+	local fqdn=$1
 	echo "Signing $fqdn"
 	echo "Waiting for request file..."
 	for i in $(seq 1 60)
@@ -351,8 +351,8 @@ KEYFILE
 }
 
 function init_vm_puppet {
-	password=$1
-	domain=$2
+	local password=$1
+	local domain=$2
 	
 	create_vm puppet 101 ${password}
 	
@@ -373,14 +373,14 @@ function init_vm_puppet {
 	vzctl exec 101 service puppetmaster restart
 	vzctl exec 101 puppet agent
 	
-	ip=$(get_ip 101)
+	local ip=$(get_ip 101)
 	vzctl exec 101 "echo hosts: >> /etc/puppet/hieradata/local.yaml"
 	vzctl exec 101 "echo '    puppet: ${ip}' >> /etc/puppet/hieradata/local.yaml"
 }
 
 function init_vm_ns1 {
-	password=$1
-	domain=$2
+	local password=$1
+	local domain=$2
 	
 	create_vm ns1 102 ${password}
 	
@@ -389,9 +389,9 @@ function init_vm_ns1 {
 }
 
 function init {
-	cluster_name=$1
-	domain=$2
-	password=$3
+	local cluster_name=$1
+	local domain=$2
+	local password=$3
 	
 	echo Updating master
 	rm -f /etc/apt/sources.list.d/pve-enterprise.list
@@ -418,13 +418,13 @@ RESOLV
 	init_vm_puppet ${password} ${domain}
 	init_vm_ns1 ${password} ${domain}
 	
-	ip=$(ip addr | grep $IP_RANGE | cut -f 6 -d' ' | cut -f 1 -d/)
-	hostname=$(hostname)
+	local ip=$(ip addr | grep $IP_RANGE | cut -f 6 -d' ' | cut -f 1 -d/)
+	local hostname=$(hostname)
 	add_host "$hostname" "$ip"
 }
 
 function join {
-	master=$1
+	local master=$1
 	
 	if [ -f /etc/pve/cluster.conf ]; then
 		echo "Already in cluster!"
@@ -442,10 +442,10 @@ function join {
 }
 
 function add {
-	hostname=$1
-	password=$2
-	disk=$3
-	vmid=$(next_vmid)
+	local hostname=$1
+	local password=$2
+	local disk=$3
+	local vmid=$(next_vmid)
 	
 	create_vm "$hostname" "$vmid" "$password" "$disk"
 	puppet_init "$vmid"
