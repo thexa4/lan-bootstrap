@@ -27,7 +27,7 @@ function help {
 	echo "  $0 add hostname password"
 	echo "  $0 sign fqdn"
 	echo "  $0 destroy vmid"
-	echo "  $0 clean vmid"
+	echo "  $0 clean vmid fqdn"
 	exit 1
 }
 
@@ -444,7 +444,7 @@ function join {
 }
 
 function destroy {
-	
+	echo ""
 }
 
 function clean {
