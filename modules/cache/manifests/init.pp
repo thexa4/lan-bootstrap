@@ -10,16 +10,9 @@ class cache {
 		require => Package["nginx"],
 	}
 	
-	file { "/etc/nginx/sites-available/steam":
+	file { "/etc/nginx/conf.d/steam":
 		ensure => present,
 		source => "puppet:///modules/cache/steam",
-		require => Package["nginx"],
-	}
-	
-	file { "/etc/nginx/sites-enabled/steam":
-		ensure => link,
-		target => "/etc/nginx/sites-available/steam",
-		notify => Service["nginx"],
 		require => Package["nginx"],
 	}
 	
