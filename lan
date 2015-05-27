@@ -53,7 +53,7 @@ function add_host {
 		master_do add-host "$hostname" "$ip"
 	else
 		vzctl exec 101 "echo '    ${hostname}: ${ip}' >> /etc/puppet/hieradata/local.yaml"
-		puppet_run 102
+		puppet_run 102 || true
 	fi
 }
 
