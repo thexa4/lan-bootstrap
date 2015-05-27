@@ -1,7 +1,7 @@
 class cache {
 	package { "nginx":
 		ensure => present,
-		require => [ File["/etc/apt/sources.list.d/nginx.conf"], Exec["refresh apt-get nginx"] ],
+		require => [ File["/etc/apt/sources.list.d/nginx.list"], Exec["refresh apt-get nginx"] ],
 	}
 	
 	exec { "download nginx-cache config":
