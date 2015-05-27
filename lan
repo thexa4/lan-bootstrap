@@ -467,14 +467,15 @@ file { "/var/lib/puppet/signed/$fqdn":
 }
 
 file_line { "hostline":
-	path => "/etc/puppet/puppetdata/local.yaml",
+	path => "/etc/puppet/hieradata/local.yaml",
 	ensure => absent,
 	line => "    $hostname",
 	match => "^    $hostname:",
 	multiple => true,
 }
 MANIFEST
-		vzctl exec 101 puppet apply /tmp/clean-$vmid.puppet
+		vzctl exec 101 puppet apply /tmp/clean-$vmid.puppet --test
+		vzctl exec 101 rm /tmp/clean-$vmid.puppet
 	fi
 }
 
