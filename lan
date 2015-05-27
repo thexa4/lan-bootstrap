@@ -282,21 +282,30 @@ function puppet_init {
 		sign "$fqdn"
 	fi
 	
-	sleep 5
 	puppet_run $vmid
 }
 
 function sign {
 	fqdn=$1
-	echo "Waiting for request file"
-	for i in $(seq 1 30)
+	echo "Waiting for request file..."
+	for i in $(seq 1 60)
 	do
 		sleep 1
 		if vzctl exec 101 stat "/var/lib/puppet/ssl/ca/requests/${fqdn}.pem" 2>/dev/null > /dev/null; then
+			echo "...found."
 			break
 		fi
 	done
 	vzctl exec 101 puppet ca sign "${fqdn}" > /dev/null
+	echo "Waiting for signed certificate...
+	for i in $(seq 1 60)
+	do
+		sleep 1
+		if vzctl exec 101 stat "/var/lib/puppet/ssl/ca/signed/${fqdn}.pem" 2>/dev/null > /dev/null; then
+			echo "...found."
+			break
+		fi
+	done
 }
 
 function init_template {
