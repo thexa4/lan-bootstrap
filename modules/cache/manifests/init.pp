@@ -14,6 +14,7 @@ class cache {
 		ensure => present,
 		source => "puppet:///modules/cache/steam",
 		require => Package["nginx"],
+		notify => Service["nginx"],
 	}
 	
 	service { "nginx":
@@ -40,4 +41,14 @@ class cache {
 	exec { "refresh apt-get nginx":
 		command => "/usr/bin/apt-get update",
 	}
+	
+	$www_list = [ '/data', '/data/www', '/data/www/cache',  '/data/www/cache/tmp', '/data/www/cache/installs',  '/data/www/cache/other', '/data/www/cache/steam' ]
+
+	file { $www_list:
+	  ensure => directory,
+	  owner  => 'www-data',
+	  group  => 'www-data',
+	  before => Service['nginx'],
+	}
+	
 }
