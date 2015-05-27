@@ -6,7 +6,7 @@ class cache {
 	
 	file { "/etc/nginx/lancache":
 		ensure => directory,
-		source => "puppet://modules/cache/lancache/lancache",
+		source => "puppet:///modules/cache/lancache/lancache",
 		recurse => true,
 		require => Package["nginx"],
 	}
