@@ -44,7 +44,7 @@ class cache {
 		source => "puppet:///modules/cache/nginx.list",
 	}
 	
-	Exec { "refresh apt-get nginx":
+	exec { "refresh apt-get nginx":
 		command => "/usr/bin/apt-get update",
 	}
 }
