@@ -26,6 +26,8 @@ function help {
 	echo "  $0 join master_hostname"
 	echo "  $0 add hostname password"
 	echo "  $0 sign fqdn"
+	echo "  $0 destroy vmid"
+	echo "  $0 clean vmid"
 	exit 1
 }
 
@@ -441,6 +443,41 @@ function join {
 	add_host "$hostname" "$ip" 
 }
 
+function destroy {
+	
+}
+
+function clean {
+	local $vmid=$1
+	local $fqdn=$2
+	
+	if [ -f /etc/lan-master.conf ]; then
+		master_do clean "$vmid"
+	else
+		
+		local hostname=$(echo $fqdn | cut -f1 -d.)
+		
+		cat > /var/lib/vz/private/101/tmp/clean-$vmid.puppet << MANIFEST
+file { "/var/lib/puppet/request/$fqdn":
+	ensure => absent,
+}
+
+file { "/var/lib/puppet/signed/$fqdn":
+	ensure => absent,
+}
+
+file_line { "hostline":
+	path => "/etc/puppet/puppetdata/local.yaml",
+	ensure => absent,
+	line => "    $hostname",
+	match => "^    $hostname:",
+	multiple => true,
+}
+MANIFEST
+		vzctl exec 101 puppet apply /tmp/clean-$vmid.puppet
+	fi
+}
+
 function add {
 	local hostname=$1
 	local password=$2
@@ -483,6 +520,18 @@ case $subcommand in
 			help
 		fi
 		sign $2
+		;;
+	clean)
+		if [ $# -ne 3 ]; then
+			help
+		fi
+		clean $2 $3
+		;;
+	destroy)
+		if [ $# -ne 2 ]; then
+			help
+		fi
+		destroy $2
 		;;
 	*)
 		help
