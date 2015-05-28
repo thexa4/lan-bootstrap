@@ -135,7 +135,7 @@ function add {
 	puppet_init "$vmid"
 	puppet_run "$vmid"
 	
-	trigger $hostname
+	trigger "$vmid" "$hostname"
 }
 
 case $subcommand in
