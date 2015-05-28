@@ -3,5 +3,15 @@ class dhcp {
 		ensure => present,
 	}
 	
+	service { "isc-dhcp-server":
+		ensure => running,
+		require => Package["isc-dhcp-server"],
+	}
 	
+	file { "/etc/dhcp/dhcpd.conf":
+		ensure => present,
+		source => "puppet:///modules/dhcp/dhcpd.conf",
+		require => Package["isc-dhcp-server"],
+		notify => Service["isc-dhcp-server"],
+	}
 }
