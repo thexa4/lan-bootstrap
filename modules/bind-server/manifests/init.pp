@@ -19,7 +19,7 @@ class bind-server( $cache = false, $cache_ip = "") {
 		zone_origin		=> "1.168.192.in-addr.arpa",
 	}
 	
-	define cacheZone {
+	define cacheZone( $ensure = "present" ) {
 		$ip = hiera("bind-server::cache_ip")
 	
 		bind::zone { "$name":
