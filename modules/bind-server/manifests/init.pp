@@ -20,7 +20,7 @@ class bind-server( $cache = false, $cache_ip = "") {
 	}
 	
 	define cacheZone {
-		$ip = hiera_lookup("bind-server::cache_ip")
+		$ip = hiera("bind-server::cache_ip")
 	
 		bind::zone { "$name":
 			zone_contact	=> "hostmaster.$domain",
