@@ -90,6 +90,11 @@ function destroy {
 	
 	if [ "$line" = "y" ]; then
 		vzctl stop "$vmid" || true
+		
+		if vzctl status "$vmid" | grep -q " mounted"; then
+			vzctl umount "$vmid"
+		fi
+		
 		vzctl destroy "$vmid"
 		clean "$vmid" "$fqdn"
 	else
