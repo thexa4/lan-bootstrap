@@ -14,4 +14,11 @@ class dhcp {
 		require => Package["isc-dhcp-server"],
 		notify => Service["isc-dhcp-server"],
 	}
+	
+	file { "/etc/defaults/isc-dhcp-server":
+		ensure => present,
+		source => "puppet:///modules/dhcp/isc-dhcp-server",
+		require => Package["isc-dhcp-server"],
+		notify => Service["isc-dhcp-server"],
+	}
 }
