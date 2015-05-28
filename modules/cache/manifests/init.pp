@@ -54,6 +54,7 @@ class cache {
 	  owner  => 'nginx',
 	  group  => 'nginx',
 	  before => Service['nginx'],
+	  require => Package['nginx'],
 	}
 	
 }
