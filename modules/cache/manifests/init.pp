@@ -20,6 +20,15 @@ class cache {
 	
 	file { "/etc/nginx/conf.d/default.conf":
 		ensure => absent,
+		require => Package["nginx"],
+		notify => Service["nginx"],
+	}
+	
+	file { "/etc/nginx/nginx.conf":
+		ensure => present,
+		source => "puppet:///modules/cache/nginx.conf",
+		require => Package["nginx"],
+		notify => Service["nginx"],
 	}
 	
 	service { "nginx":
