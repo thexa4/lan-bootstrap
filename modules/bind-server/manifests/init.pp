@@ -31,7 +31,7 @@ class bind-server( $cache = false, $cache_ip = "") {
 			zone_origin		=> "$name",
 		}
 		
-		bind::a { "$name.":
+		bind::a { "00-$name.":
 			ensure 		=> $ensure,
 			zone 		=> "$name",
 			ptr 		=> false,
@@ -40,14 +40,13 @@ class bind-server( $cache = false, $cache_ip = "") {
 			},
 		}
 		
-		bind::a { "*.$name.":
+		bind::a { "99-*.$name.":
 			ensure 		=> $ensure,
 			zone 		=> "$name",
 			ptr 		=> false,
 			hash_data	=> {
 				"*" => { owner => $ip },
 			},
-			require => Bind::A["$name."],
 		}
 	}
 	
