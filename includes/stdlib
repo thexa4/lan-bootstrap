@@ -1,66 +1,56 @@
-#!/bin/bash
-
-###
-# Lan Bootstrap
-# Initializes and configures a proxmox cluster with necessary services to run a lan
-# 
-# WARNING! This script assumes a cleanly installed proxmox server.
-### Start constants
-
-IP_RANGE="192.168.1."
-REPO="https://github.com/thexa4/lan-bootstrap.git"
-DEBIAN_VERSION=7
-
-### End constants
-
-set -euo pipefail
-IFS=$'\n\t'
-
-TEMPLATE_NAME=debian-${DEBIAN_VERSION}.0-x86-minimal.tar.gz
-
-subcommand=${1:-help}
-
-function help {
-	echo "Usage:"
-	echo "  $0 init cluster_name domain container_root_pw"
-	echo "  $0 join master_hostname"
-	echo "  $0 add hostname password"
-	echo "  $0 sign fqdn"
-	echo "  $0 destroy vmid"
-	echo "  $0 clean vmid fqdn"
-	exit 1
-}
-
-function fetch {
-	local param="$1"
-	vzctl exec 101 hiera -c /etc/puppet/hiera.yaml "$param"
-}
-
-function get_ip {
-	local vmid=$1
-	echo ${IP_RANGE}${vmid}
-}
-
 function master_do {
 	local master=$(cat /etc/lan-master.conf)
 	local dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 	ssh "$master" "$dir/lan" $@
 }
 
-function add_host {
-	local hostname=$1
-	local ip=$2
-	
-	if [ -f /etc/lan-master.conf ]; then
-		master_do add-host "$hostname" "$ip"
-	else
-		vzctl exec 101 "echo '    ${hostname}: ${ip}' >> /etc/puppet/hieradata/local.yaml"
-		puppet_run 102 || true
-	fi
-}
-
 function next_vmid {
 	pvesh get /cluster/nextid 2>/dev/null | cut -f 2 -d\"
+}
+
+function puppet_run {
+	local vmid=$1
+	echo "Running puppet on $vmid"
+	vzctl exec ${vmid} puppet agent --test
+}
+
+function sign {
+	local fqdn=$1
+	echo "Signing $fqdn"
+	echo "Waiting for request file..."
+	for i in $(seq 1 60)
+	do
+		sleep 1
+		if vzctl exec 101 stat "/var/lib/puppet/ssl/ca/requests/${fqdn}.pem" 2>/dev/null > /dev/null; then
+			echo "...found."
+			break
+		fi
+	done
+	vzctl exec 101 puppet ca sign "${fqdn}" > /dev/null
+	echo "Waiting for signed certificate..."
+	for i in $(seq 1 60)
+	do
+		sleep 1
+		if vzctl exec 101 stat "/var/lib/puppet/ssl/ca/signed/${fqdn}.pem" 2>/dev/null > /dev/null; then
+			echo "...found."
+			break
+		fi
+	done
+}
+
+function puppet_init {
+	local vmid=$1
+	
+	local fqdn=$(vzctl exec ${vmid} 'hostname --fqdn')
+	vzctl exec ${vmid} puppet agent || true
+	
+	if [ -f /etc/lan-master.conf ]; then
+		master_do sign "$fqdn"
+	else
+		sign "$fqdn"
+	fi
+	
+	puppet_run $vmid
 }
 
 # Creates and initializes a container with puppet
@@ -265,285 +255,3 @@ PUPPETKEY
 	add_host "${hostname}" "${ip}" || true
 	echo Finished initialization of ${hostname}
 }
-
-function puppet_run {
-	local vmid=$1
-	echo "Running puppet on $vmid"
-	vzctl exec ${vmid} puppet agent --test
-}
-
-function puppet_init {
-	local vmid=$1
-	
-	local fqdn=$(vzctl exec ${vmid} 'hostname --fqdn')
-	vzctl exec ${vmid} puppet agent || true
-	
-	if [ -f /etc/lan-master.conf ]; then
-		master_do sign "$fqdn"
-	else
-		sign "$fqdn"
-	fi
-	
-	puppet_run $vmid
-}
-
-function sign {
-	local fqdn=$1
-	echo "Signing $fqdn"
-	echo "Waiting for request file..."
-	for i in $(seq 1 60)
-	do
-		sleep 1
-		if vzctl exec 101 stat "/var/lib/puppet/ssl/ca/requests/${fqdn}.pem" 2>/dev/null > /dev/null; then
-			echo "...found."
-			break
-		fi
-	done
-	vzctl exec 101 puppet ca sign "${fqdn}" > /dev/null
-	echo "Waiting for signed certificate..."
-	for i in $(seq 1 60)
-	do
-		sleep 1
-		if vzctl exec 101 stat "/var/lib/puppet/ssl/ca/signed/${fqdn}.pem" 2>/dev/null > /dev/null; then
-			echo "...found."
-			break
-		fi
-	done
-}
-
-function init_template {
-		(
-		gpg --import 2> /dev/null << KEYFILE
------BEGIN PGP PUBLIC KEY BLOCK-----
-Version: SKS 1.1.3
-
-mQGiBEMoFVgRBACLjCdMBThuzcC1SpMQFycywopreZkONB+K5n8khQi44RIF1XFbMLxhgkDn
-no4s+vhFy3YPOig6tctK77XBTGXdaGJeprIIlBdu1AH/BwbQjVm0y5lXBqxSvu0HV2YZRyOS
-A+DEpIKK8Rj1j7Dzjosnl5mO+I/FvfHvkwfnviNhywCg6IVMqmB2eyywWWjsVpETqTsw42cD
-/Rn1ei7oonv6nKCENEjPfabqJrfmoZnis9sG9Gqg9bIl7GF3JURWxIjO6o9sDClla9mBlW11
-P2OffKmn0+NbRabxP6lrIwJgLU0BhpOdgLTyx1AMYjALEvD729YACGsziUL6gO9I8KMIW9eN
-FO4xiVcLbmnNX/Hj37SnL7Nswb0cBACKiHm+dEujtwSaGQkDbnp/y0pQKpldoCt8q5jVRfEj
-bAxPbArj44Shih+VCThIqFGpA15seVnxtIpQHZffGYko+5YkuN7XCy2n7rY3FGUQELBSFMKZ
-dHQGDB+VbFmfHWeD+q5r9VDdPOfo7iiMvYw/99iEPHwi+OCUcONt7Tes67QkT3BlblZaIFBy
-b2plY3QgPHNlY3VyaXR5QG9wZW52ei5vcmc+iF4EExECAB4FAkMoFVgCGwMGCwkIBwMCAxUC
-AwMWAgECHgECF4AACgkQkqYNpqeh1LaDLgCfatwKg7atCKMy8wit0R23l3S0GQwAoL5Nbuu2
-AO1RORAi7fFOLCpmDoSyuQENBEmMN2AQBADouz7Emh5CVXe6oj+mwaYabnR5W8wQFCsdhhx5
-RholEyM5THEgEbYBwySh9cQeIgJbhzFhMRRrh5GxsFCMDDx3CXv7MdKPPPytg1z6UgXWlwl/
-NCePWVn6gRpL80UF8MkyhRtmPPJVMNBaSgqYnr4zXRhCjUWJnihoSnqtpQoK1wAECwP6A8rF
-pc2AwrqGSjsgECiHRu3vh3peev0RItpII1fV/gh2ixbXLxuzSNt764eVcE+uP3Rh64CDFMga
-ZfxtFVJDJ3JlAzM9vfeSfeAf89oPO99ioxhF548pgCgWC6D1cfjNpe7ebezdGpEy2DrXk/nt
-JFyhBTFXT4KJq9DOy9tfN7WIRgQYEQIABgUCSYw3YAAKCRCSpg2mp6HUtjwOAJ9DeAFI0XpN
-eYNuH6BwkKfqq77CEwCg2BK03uW0u2sBh4x068sXWE7nHLc=
-=Gmr9
------END PGP PUBLIC KEY BLOCK-----
-KEYFILE
-	
-		cd /var/lib/vz/template/cache/
-		if ! [ -f "${TEMPLATE_NAME}" ]; then
-			wget http://download.openvz.org/template/precreated/${TEMPLATE_NAME}
-		fi
-		rm -f "${TEMPLATE_NAME}.asc"
-		wget http://download.openvz.org/template/precreated/${TEMPLATE_NAME}.asc -nv
-		gpg -q --verify ${TEMPLATE_NAME}.asc 2> /dev/null || ( rm ${TEMPLATE_NAME}; exit 1 ) 
-	) || (
-		echo "Unable to download verified template"
-		exit 1
-	)
-}
-
-function init_vm_puppet {
-	local password=$1
-	local domain=$2
-	
-	create_vm puppet 101 ${password}
-	
-	vzctl exec 101 apt-get -qq --yes install puppetmaster git
-	vzctl exec 101 mkdir /opt/max
-	vzctl exec 101 git clone ${REPO} /opt/max/puppet-lan > /dev/null
-	vzctl exec 101 rm -r /etc/puppet/modules /etc/puppet/puppet.conf
-	
-	vzctl exec 101 ln -s /opt/max/puppet-lan/puppet.conf /etc/puppet/puppet.conf
-	vzctl exec 101 ln -s /opt/max/puppet-lan/modules /etc/puppet/modules
-	vzctl exec 101 ln -s /opt/max/puppet-lan/manifests/site.pp /etc/puppet/manifests/site.pp
-	vzctl exec 101 ln -s /opt/max/puppet-lan/hiera.yaml /etc/puppet/hiera.yaml
-	vzctl exec 101 ln -s /opt/max/puppet-lan/hieradata /etc/puppet/hieradata
-	
-	# Reset local config
-	vzctl exec 101 "echo domain: ${domain} > /etc/puppet/hieradata/local.yaml"
-	
-	vzctl exec 101 service puppetmaster restart
-	vzctl exec 101 puppet agent
-	
-	local ip=$(get_ip 101)
-	vzctl exec 101 "echo hosts: >> /etc/puppet/hieradata/local.yaml"
-	vzctl exec 101 "echo '    puppet: ${ip}' >> /etc/puppet/hieradata/local.yaml"
-}
-
-function init_vm_ns1 {
-	local password=$1
-	local domain=$2
-	
-	create_vm ns1 102 ${password}
-	
-	vzctl exec 102 "echo $(get_ip 101) puppet puppet.${domain} >> /etc/hosts"
-	puppet_init 102
-}
-
-function init {
-	local cluster_name=$1
-	local domain=$2
-	local password=$3
-	
-	echo Updating master
-	rm -f /etc/apt/sources.list.d/pve-enterprise.list
-	cat > /etc/resolv.conf << RESOLV
-search ${domain}
-domain ${domain}
-nameserver $(get_ip 102)
-nameserver 8.8.8.8
-RESOLV
-	
-	apt-get -qq update
-	apt-get -qq --yes dist-upgrade
-	
-	echo Downloading template
-	init_template
-
-	if [ ! -f /etc/pve/cluster.conf ]; then
-		echo "Creating cluster $cluster_name"
-		pvecm create "$cluster_name"
-	else
-		echo Cluster already exists
-	fi
-
-	init_vm_puppet ${password} ${domain}
-	init_vm_ns1 ${password} ${domain}
-	
-	local ip=$(ip addr | grep $IP_RANGE | cut -f 6 -d' ' | cut -f 1 -d/)
-	local hostname=$(hostname)
-	add_host "$hostname" "$ip"
-}
-
-function join {
-	local master=$1
-	
-	if [ -f /etc/pve/cluster.conf ]; then
-		echo "Already in cluster!"
-		exit 1;
-	fi
-	
-	init_template
-	pvecm add "$master"
-	echo "$master" > /etc/lan-master.conf
-	
-	ip=$(ip addr | grep $IP_RANGE | cut -f 6 -d' ' | cut -f 1 -d/)
-	hostname=$(hostname)
-	
-	add_host "$hostname" "$ip" 
-}
-
-function destroy {
-	local vmid=$1
-	
-	# Check for existence
-	vzctl exec "$vmid" exit || exit 1
-	
-	local fqdn=$(vzctl exec "$vmid" hostname --fqdn)
-	
-	printf "Are you sure you want to destroy ct $vmid ($fqdn) [y/N]? "
-	read line
-	
-	if [ "$line" = "y" ]; then
-		vzctl stop "$vmid"
-		vzctl destroy "$vmid"
-		clean "$vmid" "$fqdn"
-	else
-		exit 1
-	fi
-}
-
-function clean {
-	local vmid=$1
-	local fqdn=$2
-	
-	if [ -f /etc/lan-master.conf ]; then
-		master_do clean "$vmid" "$fqdn"
-	else
-		
-		local hostname=$(echo $fqdn | cut -f1 -d.)
-		local ip=$(getent hosts $fqdn | cut -f1 -d' ')
-		
-		vzctl exec 101 puppet cert clean "$fqdn"
-		cat > /var/lib/vz/private/101/tmp/clean-$vmid.puppet << MANIFEST
-file_line { "hostline":
-	path => "/etc/puppet/hieradata/local.yaml",
-	ensure => absent,
-	line => "    $hostname: $ip",
-	multiple => true,
-}
-MANIFEST
-		vzctl exec 101 puppet apply /tmp/clean-$vmid.puppet
-		vzctl exec 101 rm /tmp/clean-$vmid.puppet
-	fi
-}
-
-function add {
-	local hostname=$1
-	local password=$2
-	local disk=$3
-	local vmid=$(next_vmid)
-	
-	create_vm "$hostname" "$vmid" "$password" "$disk"
-	puppet_init "$vmid"
-	puppet_run "$vmid"
-}
-
-case $subcommand in
-	init)
-		if [ $# -ne 4 ]; then
-			help
-		fi
-
-		init $2 $3 $4
-		;;
-	join)
-		if [ $# -ne 2 ]; then
-			help
-		fi
-		join $2
-		;;
-	add)
-		if [ $# -ne 3 ] && [ $# -ne 4 ]; then
-			help
-		fi
-		add $2 $3 ${4:-16}
-		;;
-	add-host)
-		if [ $# -ne 3 ]; then
-			help
-		fi
-		add_host $2 $3
-		;;
-	sign)
-		if [ $# -ne 2 ]; then
-			help
-		fi
-		sign $2
-		;;
-	clean)
-		if [ $# -ne 3 ]; then
-			help
-		fi
-		clean $2 $3
-		;;
-	destroy)
-		if [ $# -ne 2 ]; then
-			help
-		fi
-		destroy $2
-		;;
-	*)
-		help
-		;;
-esac
-exit 0	
