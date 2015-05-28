@@ -128,14 +128,6 @@ function add {
 	trigger $hostname
 }
 
-# Triggers
-
-function trigger_cache1 {
-	
-}
-
-# End Triggers
-
 case $subcommand in
 	init)
 		if [ $# -ne 4 ]; then

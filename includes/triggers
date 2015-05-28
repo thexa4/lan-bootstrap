@@ -1,0 +1,7 @@
+# Triggers
+
+function trigger_cache1 {
+	echo Hello World
+}
+
+# End Triggers
