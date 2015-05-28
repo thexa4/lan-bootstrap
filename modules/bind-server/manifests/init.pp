@@ -20,6 +20,8 @@ class bind-server( $cache = false, $cache_ip = "") {
 	}
 	
 	define cacheZone {
+		$ip = hiera_lookup("bind-server::cache_ip")
+	
 		bind::zone { "$name":
 			zone_contact	=> "hostmaster.$domain",
 			zone_ns			=> ['ns1'],
@@ -28,21 +30,21 @@ class bind-server( $cache = false, $cache_ip = "") {
 			zone_origin		=> "$name",
 		}
 		
-		bind::a { "$name.":
+		bind::a { "":
 			ensure 		=> present,
 			zone 		=> "$name",
 			ptr 		=> false,
 			hash_data	=> {
-				"$name" => { owner => $cache_ip },
+				"$name" => { owner => $ip },
 			}
 		}
 		
-		bind::a { "*.$name.":
+		bind::a { "*":
 			ensure 		=> present,
 			zone 		=> "$name",
 			ptr 		=> false,
 			hash_data	=> {
-				"$name" => { owner => $cache_ip },
+				"$name" => { owner => $ip },
 			}
 		}
 	}
