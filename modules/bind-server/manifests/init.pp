@@ -20,7 +20,7 @@ class bind-server( $cache = false, $cache_ip = "") {
 	}
 	
 	define cacheZone( $ensure = "present" ) {
-		$ip = hiera("bind-server::cache_ip")
+		$ip = hiera("bind-server::cache_ip", "")
 	
 		bind::zone { "$name":
 			ensure			=> $ensure,
