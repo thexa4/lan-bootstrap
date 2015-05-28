@@ -30,21 +30,21 @@ class bind-server( $cache = false, $cache_ip = "") {
 			zone_origin		=> "$name",
 		}
 		
-		bind::a { "":
+		bind::a { "$name.":
 			ensure 		=> present,
 			zone 		=> "$name",
 			ptr 		=> false,
 			hash_data	=> {
-				"$name" => { owner => $ip },
+				"" => { owner => $ip },
 			}
 		}
 		
-		bind::a { "*":
+		bind::a { "*.$name.":
 			ensure 		=> present,
 			zone 		=> "$name",
 			ptr 		=> false,
 			hash_data	=> {
-				"$name" => { owner => $ip },
+				"*" => { owner => $ip },
 			}
 		}
 	}
