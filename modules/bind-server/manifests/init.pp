@@ -97,7 +97,13 @@ class bind-server( $cache = false, $cache_ip = "") {
 			"content8.steampowered.com",
 		]
 		
-		cacheZone { $overrides:
-			ensure => $cache ? "present" : "absent",
+		if($cache) {
+			cacheZone { $overrides:
+				ensure => "present",
+			}
+		} else {
+			cacheZone { $overrides:
+				ensure => "absent",
+			}
 		}
 }
