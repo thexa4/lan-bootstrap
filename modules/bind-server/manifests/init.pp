@@ -94,7 +94,7 @@ class bind-server( $cache = false, $cache_ip = "") {
 			"content6.steampowered.com",
 			"content7.steampowered.com",
 			"content8.steampowered.com",
-		];
+		]
 		
 		cacheZone { $overrides: }
 	}
