@@ -31,22 +31,22 @@ class bind-server( $cache = false, $cache_ip = "") {
 			zone_origin		=> "$name",
 		}
 		
-		bind::a { "00-$name.":
-			ensure 		=> $ensure,
-			zone 		=> "$name",
-			ptr 		=> false,
-			hash_data	=> {
-				"" => { owner => $ip },
-			},
-		}
+		if($ensure == "present") {
+			bind::a { "00-$name.":
+				zone 		=> "$name",
+				ptr 		=> false,
+				hash_data	=> {
+					"" => { owner => $ip },
+				},
+			}
 		
-		bind::a { "99-*.$name.":
-			ensure 		=> $ensure,
-			zone 		=> "$name",
-			ptr 		=> false,
-			hash_data	=> {
-				"*" => { owner => $ip },
-			},
+			bind::a { "99-*.$name.":
+				zone 		=> "$name",
+				ptr 		=> false,
+				hash_data	=> {
+					"*" => { owner => $ip },
+				},
+			}
 		}
 	}
 	
