@@ -23,4 +23,9 @@ class samba {
 		ensure => directory,
 		require => File["/data"],
 	}
+
+	file { "/data/inbox":
+		ensure => directory,
+		require => File["/data"],
+	}
 }
