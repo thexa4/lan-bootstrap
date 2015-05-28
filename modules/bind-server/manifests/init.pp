@@ -35,7 +35,10 @@ class bind-server( $cache = false, $cache_ip = "") {
 			zone 		=> "$name",
 			ptr 		=> false,
 			hash_data	=> {
-				"" => { owner => $ip },
+				"" => {
+					owner => $ip,
+					record_class => "",
+				},
 			}
 		}
 		
