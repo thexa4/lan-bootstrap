@@ -35,7 +35,7 @@ class bind-server( $cache = false, $cache_ip = "") {
 			zone 		=> "$name",
 			hash_data	=> {
 				"" => { owner => $ip },
-			}
+			},
 		}
 		
 		bind::a { "*.$name.":
@@ -44,7 +44,7 @@ class bind-server( $cache = false, $cache_ip = "") {
 			ptr 		=> false,
 			hash_data	=> {
 				"*" => { owner => $ip },
-			}
+			},
 			require => Bind::A["$name."],
 		}
 	}
