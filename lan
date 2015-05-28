@@ -89,7 +89,7 @@ function destroy {
 	read line
 	
 	if [ "$line" = "y" ]; then
-		vzctl stop "$vmid"
+		vzctl stop "$vmid" || true
 		vzctl destroy "$vmid"
 		clean "$vmid" "$fqdn"
 	else
