@@ -1,7 +1,17 @@
 # Triggers
 
-function trigger_cache1 {
-	echo Hello World
+function trigger_cache1_remote {
+	puppet_apply 101 << MANIFEST
+	
+	file_line { "enable cache":
+		ensure => present,
+		path => "/etc/puppet/hieradata/local.yaml",
+		line => "bind-server::cache: true",
+		after => "---"
+	}
+MANIFEST
+
+	puppet_run 102
 }
 
 # End Triggers

@@ -58,7 +58,8 @@ function init_vm_puppet {
 	vzctl exec 101 ln -s /opt/max/puppet-lan/hieradata /etc/puppet/hieradata
 	
 	# Reset local config
-	vzctl exec 101 "echo domain: ${domain} > /etc/puppet/hieradata/local.yaml"
+	vzctl exec 101 "--- >> /etc/puppet/hieradata/local.yaml"
+	vzctl exec 101 "echo domain: ${domain} >> /etc/puppet/hieradata/local.yaml"
 	
 	vzctl exec 101 service puppetmaster restart
 	vzctl exec 101 puppet agent

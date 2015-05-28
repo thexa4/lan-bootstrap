@@ -45,13 +45,20 @@ function help {
 }
 
 function trigger {
-	local hostname=$1
-	if type "trigger_$hostname" | grep -q function; then
-		
-		if [ -f "/etc/lan-master.conf" ]; then
-			master_do trigger "$hostname"
-		else
-			trigger_$hostname $hostname
+	local vmid=$1
+	local hostname=$2
+	
+	if vzctl exec "$vmid" exit; then
+		if type "trigger_$hostname_local" | grep -q function; then
+			trigger_$hostname_local "$vmid" "$hostname"
+		fi
+	fi
+	
+	if [ -f "/etc/lan-master.conf" ]; then
+		master_do trigger "$vmid" "$hostname"	
+	else
+		if type "trigger_$hostname_remote" | grep -q function; then
+			trigger_$hostname_remote "$vmid" "$hostname"
 		fi
 	fi
 }
@@ -171,10 +178,10 @@ case $subcommand in
 		destroy $2
 		;;
 	trigger)
-		if [ $# -ne 2 ]; then
+		if [ $# -ne 3 ]; then
 			help
 		fi
-		trigger $2
+		trigger $2 $3
 		;;
 	*)
 		help
