@@ -33,11 +33,9 @@ class bind-server( $cache = false, $cache_ip = "") {
 		bind::record { "$name.":
 			ensure 		=> present,
 			zone 		=> "$name",
+			record_type	=> "A",
 			hash_data	=> {
-				"" => {
-					owner => $ip,
-					record_class => "A",
-				},
+				"" => { owner => $ip },
 			}
 		}
 		
