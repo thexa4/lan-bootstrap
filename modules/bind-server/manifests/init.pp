@@ -34,6 +34,7 @@ class bind-server( $cache = false, $cache_ip = "") {
 		bind::a { "$name.":
 			ensure 		=> $ensure,
 			zone 		=> "$name",
+			ptr 		=> false,
 			hash_data	=> {
 				"" => { owner => $ip },
 			},
