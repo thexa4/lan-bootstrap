@@ -81,7 +81,7 @@ function destroy {
 	local vmid=$1
 	
 	# Check for existence
-	vzctl exec "$vmid" exit || exit 1
+	vzctl status "$vmid" | grep -q exist || exit 1
 	
 	local fqdn=$(vzctl exec "$vmid" hostname --fqdn)
 	
