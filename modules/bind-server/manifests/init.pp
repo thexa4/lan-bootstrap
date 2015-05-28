@@ -1,4 +1,5 @@
-class bind-server {
+class bind-server( $cache = false, $cache_ip = "") {
+	
 	$domain = hiera('domain')
 	$hosts = hiera_hash('hosts')
 	
@@ -16,6 +17,34 @@ class bind-server {
 		zone_serial		=> 42,
 		zone_ttl		=> 3600,
 		zone_origin		=> "1.168.192.in-addr.arpa",
+	}
+	
+	define cacheZone {
+		bind::zone { "$name":
+			zone_contact	=> "hostmaster.$domain",
+			zone_ns			=> ['ns1'],
+			zone_serial		=> 42,
+			zone_ttl		=> 3600,
+			zone_origin		=> "$name",
+		}
+		
+		bind::a { "$name.":
+			ensure 		=> present,
+			zone 		=> "$name",
+			ptr 		=> false,
+			hash_data	=> {
+				"$name" => { owner => $cache_ip },
+			}
+		}
+		
+		bind::a { "*.$name.":
+			ensure 		=> present,
+			zone 		=> "$name",
+			ptr 		=> false,
+			hash_data	=> {
+				"$name" => { owner => $cache_ip },
+			}
+		}
 	}
 	
 	define hieraHost {
@@ -52,4 +81,21 @@ class bind-server {
 	
 	$keys = keys($hosts)
 	hieraHost { $keys: }
+	
+	if($cache)
+	{
+		$overrides = [
+			"cs.steampowered.com",
+			"content1.steampowered.com",
+			"content2.steampowered.com",
+			"content3.steampowered.com",
+			"content4.steampowered.com",
+			"content5.steampowered.com",
+			"content6.steampowered.com",
+			"content7.steampowered.com",
+			"content8.steampowered.com",
+		];
+		
+		cacheZone { $overrides: }
+	}
 }
