@@ -2,8 +2,8 @@
 
 function trigger_cache1_remote {
 
-	hostname=$2
-	ip=$(getent hosts "$hostname" | cut -f 1 -d' ')
+	local hostname=$2
+	local ip=$(getent hosts "$hostname" | cut -f 1 -d' ')
 	
 	puppet_apply 101 << MANIFEST
 	
@@ -23,6 +23,21 @@ function trigger_cache1_remote {
 MANIFEST
 
 	puppet_run 102
+}
+
+function trigger_cache1_local {
+	
+	local vmid=$1
+	if [ ! -d /var/lib/vz/data/ ]; then mkdir /var/lib/vz/data/; fi
+	if [ ! -d /var/lib/vz/data/www/ ]; then mkdir /var/lib/vz/data/www/; fi
+	
+	echo '#!/bin/bash' > /etc/pve/local/openvz/${vmid}.mount
+	echo '. /etc/vz/vz.conf' >> /etc/pve/local/openvz/${vmid}.mount
+	echo '. ${VE_CONFFILE}' >> /etc/pve/local/openvz/${vmid}.mount
+	echo 'mount -n -t simfs /var/lib/vz/data/www ${VE_ROOT}/data/www -o /var/lib/vz/data/www' >> /etc/pve/local/openvz/${vmid}.mount
+	chmod +x /etc/pve/local/openvz/${vmid}.mount
+	
+	vzctl restart "${vmid}"
 }
 
 # End Triggers
