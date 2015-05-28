@@ -113,7 +113,7 @@ function clean {
 		local hostname=$(echo $fqdn | cut -f1 -d.)
 		local ip=$(getent hosts $fqdn | cut -f1 -d' ')
 		
-		vzctl exec 101 puppet cert clean "$fqdn"
+		vzctl exec 101 puppet cert clean "$fqdn" || true
 		puppet_apply 101 << MANIFEST
 file_line { "hostline":
 	path => "/etc/puppet/hieradata/local.yaml",
