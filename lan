@@ -40,7 +40,7 @@ function help {
 	echo "  $0 sign fqdn"
 	echo "  $0 destroy vmid"
 	echo "  $0 clean vmid fqdn"
-	echo "  $0 trigger hostname"
+	echo "  $0 trigger vmid hostname"
 	exit 1
 }
 
@@ -49,16 +49,16 @@ function trigger {
 	local hostname=$2
 	
 	if vzctl exec "$vmid" exit; then
-		if type "trigger_$hostname_local" | grep -q function; then
-			trigger_$hostname_local "$vmid" "$hostname"
+		if type "trigger_${hostname}_local" | grep -q function; then
+			trigger_${hostname}_local "$vmid" "$hostname"
 		fi
 	fi
 	
 	if [ -f "/etc/lan-master.conf" ]; then
 		master_do trigger "$vmid" "$hostname"	
 	else
-		if type "trigger_$hostname_remote" | grep -q function; then
-			trigger_$hostname_remote "$vmid" "$hostname"
+		if type "trigger_${hostname}_remote" | grep -q function; then
+			trigger_${hostname}_remote "$vmid" "$hostname"
 		fi
 	fi
 }
