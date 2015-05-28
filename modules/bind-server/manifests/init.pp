@@ -98,6 +98,6 @@ class bind-server( $cache = false, $cache_ip = "") {
 		]
 		
 		cacheZone { $overrides:
-			ensure => $cache,
+			ensure => $cache ? "present" : "absent",
 		}
 }
