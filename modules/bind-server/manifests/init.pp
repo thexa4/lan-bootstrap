@@ -30,7 +30,7 @@ class bind-server( $cache = false, $cache_ip = "") {
 			zone_origin		=> "$name",
 		}
 		
-		bind::a { "$name.":
+		bind::record { "$name.":
 			ensure 		=> present,
 			zone 		=> "$name",
 			ptr 		=> false,
