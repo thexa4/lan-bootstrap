@@ -11,7 +11,7 @@ function next_vmid {
 function puppet_run {
 	local vmid=$1
 	echo "Running puppet on $vmid"
-	vzctl exec ${vmid} puppet agent --test
+	vzctl exec ${vmid} puppet agent --test || true
 }
 
 function puppet_apply {
