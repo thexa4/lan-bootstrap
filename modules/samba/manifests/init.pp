@@ -14,4 +14,13 @@ class samba {
 		require => Package["samba"],
 		notify => Service["samba"],
 	}
+
+	file { "/data":
+		ensure => directory,
+	}
+
+	file { "/data/games":
+		ensure => directory,
+		require => File["/data"],
+	}
 }
