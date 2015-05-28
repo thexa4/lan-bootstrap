@@ -1,12 +1,23 @@
 # Triggers
 
 function trigger_cache1_remote {
+
+	hostname=$2
+	ip=$(getent hosts "$hostname" | cut -f 1 -d' ')
+	
 	puppet_apply 101 << MANIFEST
 	
 	file_line { "enable cache":
 		ensure => present,
 		path => "/etc/puppet/hieradata/local.yaml",
 		line => "bind-server::cache: true",
+		after => "---"
+	}
+	
+	file_line { "set cache ip":
+		ensure => present,
+		path => "/etc/puppet/hieradata/local.yaml",
+		line => "bind-server::cache_ip: $ip",
 		after => "---"
 	}
 MANIFEST
