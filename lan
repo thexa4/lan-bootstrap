@@ -1,0 +1,193 @@
+#!/bin/bash
+
+###
+# Lan Bootstrap
+# Initializes and configures a proxmox cluster with necessary services to run a lan
+# 
+# WARNING! This script assumes a cleanly installed proxmox server.
+### Start constants
+
+IP_RANGE="192.168.1."
+REPO="https://github.com/thexa4/lan-bootstrap.git"
+DEBIAN_VERSION=7
+
+### End constants
+### Start user defined functions
+
+function get_ip {
+	local vmid=$1
+	echo ${IP_RANGE}${vmid}
+}
+
+### End user defined functions
+
+set -euo pipefail
+IFS=$'\n\t'
+
+DIR="${BASH_SOURCE%/*}"
+if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
+. "$DIR/includes/stdlib"
+. "$DIR/includes/init"
+. "$DIR/includes/triggers"
+
+subcommand=${1:-help}
+
+function help {
+	echo "Usage:"
+	echo "  $0 init cluster_name domain container_root_pw"
+	echo "  $0 join master_hostname"
+	echo "  $0 add hostname password"
+	echo "  $0 sign fqdn"
+	echo "  $0 destroy vmid"
+	echo "  $0 clean vmid fqdn"
+	echo "  $0 trigger hostname"
+	exit 1
+}
+
+function trigger {
+	local hostname=$1
+	if type "trigger_$hostname" | grep -q function; then
+		
+		if [ -f "/etc/lan-master.conf" ]; then
+			master_do trigger "$hostname"
+		else
+			trigger_$hostname $hostname
+		fi
+	fi
+}
+
+function add_host {
+	local hostname=$1
+	local ip=$2
+	
+	if [ -f /etc/lan-master.conf ]; then
+		master_do add-host "$hostname" "$ip"
+	else
+		vzctl exec 101 "echo '    ${hostname}: ${ip}' >> /etc/puppet/hieradata/local.yaml"
+		puppet_run 102 || true
+	fi
+}
+
+
+
+function destroy {
+	local vmid=$1
+	
+	# Check for existence
+	vzctl exec "$vmid" exit || exit 1
+	
+	local fqdn=$(vzctl exec "$vmid" hostname --fqdn)
+	
+	printf "Are you sure you want to destroy ct $vmid ($fqdn) [y/N]? "
+	read line
+	
+	if [ "$line" = "y" ]; then
+		vzctl stop "$vmid"
+		vzctl destroy "$vmid"
+		clean "$vmid" "$fqdn"
+	else
+		exit 1
+	fi
+}
+
+function clean {
+	local vmid=$1
+	local fqdn=$2
+	
+	if [ -f /etc/lan-master.conf ]; then
+		master_do clean "$vmid" "$fqdn"
+	else
+		
+		local hostname=$(echo $fqdn | cut -f1 -d.)
+		local ip=$(getent hosts $fqdn | cut -f1 -d' ')
+		
+		vzctl exec 101 puppet cert clean "$fqdn"
+		cat > /var/lib/vz/private/101/tmp/clean-$vmid.puppet << MANIFEST
+file_line { "hostline":
+	path => "/etc/puppet/hieradata/local.yaml",
+	ensure => absent,
+	line => "    $hostname: $ip",
+	multiple => true,
+}
+MANIFEST
+		vzctl exec 101 puppet apply /tmp/clean-$vmid.puppet
+		vzctl exec 101 rm /tmp/clean-$vmid.puppet
+	fi
+}
+
+function add {
+	local hostname=$1
+	local password=$2
+	local disk=$3
+	local vmid=$(next_vmid)
+	
+	create_vm "$hostname" "$vmid" "$password" "$disk"
+	puppet_init "$vmid"
+	puppet_run "$vmid"
+	
+	trigger $hostname
+}
+
+# Triggers
+
+function trigger_cache1 {
+	
+}
+
+# End Triggers
+
+case $subcommand in
+	init)
+		if [ $# -ne 4 ]; then
+			help
+		fi
+
+		init $2 $3 $4
+		;;
+	join)
+		if [ $# -ne 2 ]; then
+			help
+		fi
+		join $2
+		;;
+	add)
+		if [ $# -ne 3 ] && [ $# -ne 4 ]; then
+			help
+		fi
+		add $2 $3 ${4:-16}
+		;;
+	add-host)
+		if [ $# -ne 3 ]; then
+			help
+		fi
+		add_host $2 $3
+		;;
+	sign)
+		if [ $# -ne 2 ]; then
+			help
+		fi
+		sign $2
+		;;
+	clean)
+		if [ $# -ne 3 ]; then
+			help
+		fi
+		clean $2 $3
+		;;
+	destroy)
+		if [ $# -ne 2 ]; then
+			help
+		fi
+		destroy $2
+		;;
+	trigger)
+		if [ $# -ne 2 ]; then
+			help
+		fi
+		trigger $2
+		;;
+	*)
+		help
+		;;
+esac
+exit 0	
