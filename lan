@@ -102,7 +102,7 @@ function clean {
 		local ip=$(getent hosts $fqdn | cut -f1 -d' ')
 		
 		vzctl exec 101 puppet cert clean "$fqdn"
-		cat > /var/lib/vz/private/101/tmp/clean-$vmid.puppet << MANIFEST
+		puppet_apply 101 << MANIFEST
 file_line { "hostline":
 	path => "/etc/puppet/hieradata/local.yaml",
 	ensure => absent,
@@ -110,8 +110,6 @@ file_line { "hostline":
 	multiple => true,
 }
 MANIFEST
-		vzctl exec 101 puppet apply /tmp/clean-$vmid.puppet
-		vzctl exec 101 rm /tmp/clean-$vmid.puppet
 	fi
 }
 

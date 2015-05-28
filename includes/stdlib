@@ -14,6 +14,15 @@ function puppet_run {
 	vzctl exec ${vmid} puppet agent --test
 }
 
+function puppet_apply {
+	local vmid=$1
+	local filename=$RANDOM
+	
+	cat > /var/lib/vz/private/101/tmp/$filename.puppet
+	vzctl exec $vmid puppet apply /tmp/$filename.puppet
+	vzctl exec $vmid rm /tmp/$filename.puppet
+}
+
 function sign {
 	local fqdn=$1
 	echo "Signing $fqdn"
