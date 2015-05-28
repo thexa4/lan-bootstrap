@@ -55,4 +55,10 @@ CONFIG
 	vzctl restart "${vmid}"
 }
 
+function trigger_openttd_local {
+	local vmid=$1
+	
+	vzctl exec "${vmid}" /etc/rc.local
+}
+
 # End Triggers
