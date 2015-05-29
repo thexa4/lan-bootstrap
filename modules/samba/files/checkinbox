@@ -11,5 +11,3 @@ for file in ${from}*; do
 		mv "${file}" "${to}"
 	fi
 done
-
-
