@@ -39,4 +39,8 @@ class samba {
 		ensure => directory,
 		require => File["/data"],
 	}
+	
+	package { "clamav":
+		ensure => present,
+	}
 }
