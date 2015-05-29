@@ -5,6 +5,10 @@ shopt -s nullglob
 from=/data/inbox/
 to=/data/games/
 
+if pgrep clamscan; then
+	exit
+fi
+
 for file in ${from}*; do
 	if ! find "${file}" -mmin -2 | grep -q ""; then
 		clamscan --quiet --remove=yes -r "${file}"
