@@ -51,7 +51,7 @@ class cod {
         file { "/opt/cod4server/cod4server":
                 ensure => present,
                 source => "puppet:///modules/samba/smb.conf",
-                require => [ File["/opt/cod4server"], Exec["extract-package"], Package["Screen"] ],
+                require => [ File["/opt/cod4server"], Exec["extract-package"], Package["screen"] ],
         }
 }
 
