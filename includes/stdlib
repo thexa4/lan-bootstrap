@@ -1,6 +1,6 @@
 function master_do {
 	local master=$(cat /etc/lan-master.conf)
-	local dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+	local dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )
 	ssh "$master" "$dir/lan" $@
 }
 
