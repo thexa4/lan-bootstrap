@@ -35,7 +35,6 @@ function trigger_cache1_local {
 	echo '. /etc/vz/vz.conf' >> /etc/pve/local/openvz/${vmid}.mount
 	echo '. ${VE_CONFFILE}' >> /etc/pve/local/openvz/${vmid}.mount
 	echo 'mount -n -t simfs /var/lib/vz/data/www ${VE_ROOT}/data/www -o /var/lib/vz/data/www' >> /etc/pve/local/openvz/${vmid}.mount
-	chmod +x /etc/pve/local/openvz/${vmid}.mount
 	
 	vzctl restart "${vmid}"
 }
