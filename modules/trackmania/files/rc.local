@@ -2,5 +2,8 @@
 #
 # rc.local
 #
-tmux new-session -d "/opt/TmDedicatedServer/TrackManiaServer /game=nations /lan game_settings=MatchSettings/tracklist.txt /dedicated_cfg=dedicated.cfg"
+(
+cd /opt/TmDedicatedServer
+tmux new-session -d "/opt/TmDedicatedServer/TrackManiaServer /game=nations /lan game_settings=MatchSettings/Lan/AdvancedTraining.txt /dedicated_cfg=dedicated.cfg"
+)
 exit 0
