@@ -20,11 +20,10 @@ class samba {
  		line => '* * * * * root /opt/checkinbox/',
 	}
 
-        file { "/opt/checkinbox":
-                ensure => present,
-                source => "puppet:///modules/samba/checkinbox",
-        }
-
+	file { "/opt/checkinbox":
+        ensure => present,
+        source => "puppet:///modules/samba/checkinbox",
+    }
 
 	file { "/data":
 		ensure => directory,
