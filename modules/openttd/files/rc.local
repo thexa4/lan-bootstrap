@@ -2,5 +2,5 @@
 #
 # rc.local
 #
-tmux new-session -d /opt/openttd/openttd -D
+tmux new-session -d "/opt/openttd/openttd -D"
 exit 0
