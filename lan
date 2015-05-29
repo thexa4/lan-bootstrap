@@ -41,6 +41,7 @@ function help {
 	echo "  $0 destroy vmid"
 	echo "  $0 clean vmid fqdn"
 	echo "  $0 trigger vmid hostname"
+	echo "  $0 pull"
 	exit 1
 }
 
