@@ -135,7 +135,7 @@ function pull {
 	if [ -f "/etc/lan-master.conf" ]; then
 		master_do pull
 	else
-		vzctl exec 101 "cd $dir; git pull"
+		vzctl exec 101 "cd /opt/max/puppet-lan/; git pull"
 	fi
 }
 
