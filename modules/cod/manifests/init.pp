@@ -1,6 +1,7 @@
 class cod {
 	package { "screen":
 		ensure => present,
+	}
 
 	exec { "add-i386":
         	command => '/usr/bin/dpkg --add-architecture i386',
