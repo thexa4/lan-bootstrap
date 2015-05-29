@@ -7,8 +7,7 @@ to=/data/games/
 
 for file in ${from}*; do
 	if ! find "${file}" -mmin -2 | grep -q ""; then
-		mv $file $to
+		clamscan --remove=yes -r "${file}"
+		mv "${file}" "${to}"
 	fi
 done
-
-

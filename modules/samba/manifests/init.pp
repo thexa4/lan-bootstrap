@@ -16,7 +16,7 @@ class samba {
 	}
 
 	file_line { 'Add checkinbox /etc/crontab':
-  		path => '/opt/checkinbox', 
+  		path => '/etc/crontab', 
  		line => '* * * * * root /opt/checkinbox/',
 	}
 
@@ -38,5 +38,9 @@ class samba {
 	file { "/data/inbox":
 		ensure => directory,
 		require => File["/data"],
+	}
+	
+	package { "clamav":
+		ensure => present,
 	}
 }
