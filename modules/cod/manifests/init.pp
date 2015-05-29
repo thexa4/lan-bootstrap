@@ -33,7 +33,7 @@ class cod {
 	file { "/opt/cod4server/general.cfg":
 		ensure => present,
 		source => "puppet:///modules/cod4/general.cfg",
-		require => Package["cod4server"],
+		require => Exec["extract-package"],
 		notify => Service["cod4server"],
 	}
 
