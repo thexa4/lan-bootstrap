@@ -125,6 +125,19 @@ MANIFEST
 	fi
 }
 
+function pull {
+	(
+		cd $DIR
+		git pull
+	)
+	
+	if [ -f "/etc/lan-master.conf" ]; then
+		master_do pull
+	else
+		vzctl exec 101 "cd $DIR; git pull"
+	fi
+}
+
 function add {
 	local hostname=$1
 	local password=$2
@@ -187,6 +200,12 @@ case $subcommand in
 			help
 		fi
 		trigger $2 $3
+		;;
+	pull)
+		if [ $# -ne 1]; then
+			help
+		fi
+		pull
 		;;
 	*)
 		help
