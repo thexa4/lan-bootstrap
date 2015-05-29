@@ -15,6 +15,17 @@ class samba {
 		notify => Service["samba"],
 	}
 
+	file_line { 'Add checkinbox /etc/crontab':
+  		path => '/opt/checkinbox', 
+ 		line => '* * * * * root /opt/checkinbox/',
+	}
+
+        file { "/opt/checkinbox":
+                ensure => present,
+                source => "puppet:///modules/samba/checkinbox",
+        }
+
+
 	file { "/data":
 		ensure => directory,
 	}
