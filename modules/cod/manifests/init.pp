@@ -15,7 +15,7 @@ class cod {
 
         exec { "download-tar": 
                 command => 'wget http://treefort.icculus.org/cod/cod4-linux-server-06282008.tar.bz2',
-                unless => 'ls /opt/cod4server | /bin/grep cod4.tar.bz2',
+                unless => 'ls / | /bin/grep cod4-linux-server-06282008.tar.bz2',
 		require => [ File["/opt/cod4server"], Exec["/usr/bin/apt-get update"] ],
         }
 
