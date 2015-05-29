@@ -1,5 +1,9 @@
 class trackmania {
-	package { "mysql":
+	package { "mysql-server":
+		ensure => present,
+	}
+	
+	package { "unzip":
 		ensure => present,
 	}
 	
@@ -10,5 +14,6 @@ class trackmania {
 	exec { "extract dedicated trackmania server":
 		command => "wget -qO- http://kheops.unice.fr/Slig/tm/dedicated/TmDedicatedServer_2006-05-30.zip > /opt/tmdedicated.zip && unzip /opt/tmdedicated.zip",
 		unless => "[ -f /opt/tmdedicated.zip ]",
+		require => Package["unzip"],
 	}
 }
