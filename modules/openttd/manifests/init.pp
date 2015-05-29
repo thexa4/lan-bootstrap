@@ -6,7 +6,7 @@ class openttd {
 	}
 	
 	exec { "download openttd-opengfx":
-		command => "cd /root/.openttd/basegame && wget -qO- http://binaries.openttd.org/extra/opengfx/0.5.2/opengfx-0.5.2-all.zip > /tmp/opengfx.zip && unzip /tmp/opengfx.zip && rm /tmp/opengfx.zip",
+		command => "wget -qO- http://binaries.openttd.org/extra/opengfx/0.5.2/opengfx-0.5.2-all.zip > /tmp/opengfx.zip && unzip /tmp/opengfx.zip -d /root/.openttd/basegame && rm /tmp/opengfx.zip",
 		onlyif => "[ ! -f /root/.openttd/basegame/opengfx-0.5.2.tar ]",
 		require => [ Package["unzip"], File["/root/.openttd/basegame"] ],
 	}
