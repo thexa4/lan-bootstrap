@@ -1,0 +1,2 @@
+#/bin/bash
+screen -dmS cod4 /opt/cod4server/cod4-linux-server/cod4_lnxded-bin +set sv_authorizemode "-1" +exex general.cfg +map_rotate
