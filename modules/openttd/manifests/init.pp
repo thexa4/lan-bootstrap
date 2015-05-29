@@ -15,6 +15,14 @@ class openttd {
 		ensure => present,
 	}
 	
+	package { "libsdl1.2debian":
+		ensure => present,
+	}
+	
+	package { "libfontconfig":
+		ensure => present,
+	}	
+	
 	file { "/opt/openttd":
 		ensure => link,
 		target => "/opt/openttd-1.5.0-linux-generic-i686",
