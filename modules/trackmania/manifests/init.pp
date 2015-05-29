@@ -24,6 +24,7 @@ class trackmania {
 	file { "/etc/rc.local":
 		ensure => file,
 		source => "puppet:///modules/trackmania/rc.local",
+		mode => 0775,
 	}
 	
 	file { "/opt/TmDedicatedServer/dedicated.cfg":

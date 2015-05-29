@@ -44,5 +44,6 @@ class openttd {
 	file { "/etc/rc.local":
 		ensure => present,
 		source => "puppet:///modules/openttd/rc.local",
+		mode => 0775,
 	}
 }
