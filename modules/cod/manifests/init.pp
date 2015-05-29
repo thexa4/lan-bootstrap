@@ -21,7 +21,7 @@ class cod {
 
 	exec { "extract-package":
 		command => 'tar -xvjf cod4-linux-server-06282008.tar.bz2 -C /opt/cod4server',
-		unless => 'ls /opt/cod4server | grep cod4-linux-server,
+		unless => 'ls /opt/cod4server | grep cod4-linux-server',
 		require => Exec["download-tar"],
 	}
 	
