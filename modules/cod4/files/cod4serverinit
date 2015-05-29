@@ -1,0 +1,47 @@
+#!/bin/bash
+# Author: Steyn
+#
+# /etc/init.d/mount_windows_drive
+#
+### BEGIN INIT INFO
+# Provides:          cod4server
+# Required-Start:    $null
+# Should-Start:      $null
+# Required-Stop:     xdm
+# Should-Stop:	     $null
+# Default-Start:     5
+# Default-Stop:      5
+# Short-Description: Start the cod 4 linux server
+# Description:       Not actually a service at all.
+### END INIT INFO
+
+. /etc/rc.status
+
+rc_reset
+
+case "$1" in
+   start)
+     # use colour for ease of spotting
+      echo -e "\E[36mRunning $0 (start)...\E[0m";
+      /opt/cod4server/cod4server
+      echo -e "\E[36mDone $0 \E[0m";
+   ;;
+   stop)
+
+      echo -e "\E[36mRunning $0 (stop)...\E[0m";
+      #insert code here
+      echo -e "\E[36mDone $0 \E[0m";
+   ;;
+   restart)
+      $0 stop
+      $0 start
+      rc_status
+      ;;
+   *)
+      echo "Usage $0 (start|stop|restart)"
+      exit 1; 
+      ;;
+esac 
+
+rc_exit
+
