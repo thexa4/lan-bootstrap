@@ -26,7 +26,7 @@ class openttd {
 	
 	file { "/root/.openttd/basegame":
 		ensure => directory,
-		require => File["/root/.openttd/basegame"],	
+		require => File["/root/.openttd"],	
 	}
 		
 	package { "tmux":
