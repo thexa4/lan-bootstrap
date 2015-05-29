@@ -16,4 +16,19 @@ class trackmania {
 		unless => "[ -d /opt/TmDedicatedServer ]",
 		require => Package["unzip"],
 	}
+	
+	package { "tmux":
+		ensure => present,
+	}
+	
+	file { "/etc/rc.local":
+		ensure => file,
+		source => "puppet:///modules/trackmania/rc.local",
+	}
+	
+	file { "/opt/TmDedicatedServer/dedicated.cfg":
+		ensure => file,
+		source => "puppet:///modules/trackmania/dedicated.cfg",
+		require => Exec["extract dedicated trackmania server"],
+	}
 }

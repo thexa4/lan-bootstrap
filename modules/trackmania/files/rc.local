@@ -1,0 +1,6 @@
+#!/bin/sh -e
+#
+# rc.local
+#
+tmux new-session -d "/opt/TmDedicatedServer/TrackManiaServer /game=nations /lan game_settings=MatchSettings/tracklist.txt /dedicated_cfg=dedicated.cfg"
+exit 0
