@@ -43,15 +43,15 @@ function trigger_samba_local {
 
         local vmid=$1
         if [ ! -d /var/lib/vz/data/ ]; then mkdir /var/lib/vz/data/; fi
-        if [ ! -d /var/lib/vz/data/games/ ]; then mkdir /var/lib/vz/data/games/; fi
-	if [ ! -d /var/lib/vz/data/inbox/ ]; then mkdir /var/lib/vz/data/inbox/; fi
+        if [ ! -d /var/lib/vz/data/samba/ ]; then mkdir /var/lib/vz/data/games/; fi
+		if [ ! -d /var/lib/vz/data/samba/games ]; then mkdir /var/lib/vz/data/inbox/; fi
+		if [ ! -d /var/lib/vz/data/samba/games ]; then mkdir /var/lib/vz/data/inbox/; fi
 
         echo '#!/bin/bash' > /etc/pve/local/openvz/${vmid}.mount
         echo '. /etc/vz/vz.conf' >> /etc/pve/local/openvz/${vmid}.mount
         echo '. ${VE_CONFFILE}' >> /etc/pve/local/openvz/${vmid}.mount
-        echo 'mount -n -t simfs /var/lib/vz/data/games ${VE_ROOT}/data/games -o /var/lib/vz/data/games' >> /etc/pve/local/openvz/${vmid}.mount
-	echo 'mount -n -t simfs /var/lib/vz/data/inbox ${VE_ROOT}/data/inbox -o /var/lib/vz/data/inbox' >> /etc/pve/local/openvz/${vmid}.mount
-
+        echo 'mount -n -t simfs /var/lib/vz/data/samba/games ${VE_ROOT}/data/games -o /var/lib/vz/data/samba/games' >> /etc/pve/local/openvz/${vmid}.mount
+		echo 'mount -n -t simfs /var/lib/vz/data/samba/inbox ${VE_ROOT}/data/inbox -o /var/lib/vz/data/samba/inbox' >> /etc/pve/local/openvz/${vmid}.mount
 
         vzctl restart "${vmid}"
 }
