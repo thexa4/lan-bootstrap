@@ -78,4 +78,19 @@ function trigger_openttd_local {
 	vzctl exec "${vmid}" /etc/rc.local
 }
 
+function trigger_trackmania_local {
+	local vmid=$1
+	local ip=$(get_ip ${vmid})
+	cat > /var/lib/vz/private/${vmid}/etc/network/interfaces.tail << CONFIG
+auto eth0
+iface eth0 inet static
+	address $ip
+	netmask 255.255.255.0
+	gateway 192.168.1.1
+CONFIG
+	vzctl set "${vmid}" --netif_add eth0,,,,vmbr0 --ipdel all --save
+
+	vzctl restart "${vmid}"
+}
+
 # End Triggers

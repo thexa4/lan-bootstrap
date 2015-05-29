@@ -3,6 +3,10 @@ class samba {
 		ensure => present,
 	}
 	
+	package { "rsync":
+		ensure => present,
+	}
+	
 	service { "samba":
 		ensure => running,
 		require => Package["samba"],
