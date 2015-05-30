@@ -24,14 +24,12 @@ case "$1" in
    ;;
    stop)
 
-      echo -e "\E[36mRunning $0 (stop)...\E[0m";
-      #insert code here
-      echo -e "\E[36mDone $0 \E[0m";
+      echo "Stop not supporterd ;p"
+
    ;;
    restart)
       $0 stop
       $0 start
-      rc_status
       ;;
    *)
       echo "Usage $0 (start|stop|restart)"
@@ -39,5 +37,4 @@ case "$1" in
       ;;
 esac 
 
-rc_exit
 
