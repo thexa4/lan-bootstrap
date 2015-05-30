@@ -41,6 +41,7 @@ class samba {
 	file { "/data/inbox":
 		ensure => directory,
 		require => File["/data"],
+		mode => 0777,
 	}
 	
 	package { "clamav":

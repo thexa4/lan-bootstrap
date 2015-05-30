@@ -12,6 +12,6 @@ fi
 for file in ${from}*; do
 	if ! find "${file}" -mmin -2 | grep -q ""; then
 		clamscan --quiet --remove=yes -r "${file}"
-		mv "${file}" "${to}" || ( rsync -a "${file}" "${to}" && rm -r "${from}" )
+		mv "${file}" "${to}" || ( rsync -a "${file}" "${to}" && rm -r "${file}" )
 	fi
 done
