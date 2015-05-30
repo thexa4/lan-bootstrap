@@ -22,7 +22,7 @@ class empires($username = "", $password = "", $verification = "") {
 	}
 	
 	exec { "extract updatetool.rar":
-		command => "(cd /opt/updatetool/ && rar e updatetool.rar)",
+		command => "bash 'cd /opt/updatetool/ && rar e updatetool.rar'",
 		unless => "[ -f /opt/updatetool/UpdateTool.exe ]",
 		require => [ Package["unrar"], Exec["download updatetool.rar"] ],
 	}
