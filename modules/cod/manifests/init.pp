@@ -32,14 +32,14 @@ class cod {
 	
 	file { "/opt/cod4server/general.cfg":
 		ensure => present,
-		source => "puppet:///modules/cod4/general.cfg",
+		source => "puppet:///modules/cod/general.cfg",
 		require => Exec["extract-package"],
 		notify => Service["cod4server"],
 	}
 
         file { "/etc/init.d/cod4server":
                 ensure => present,
-                source => "puppet:///modules/cod4/cod4serverinit",
+                source => "puppet:///modules/cod/cod4serverinit",
 		require => File["/opt/cod4server/cod4server"],
         }
 
@@ -50,7 +50,7 @@ class cod {
 
         file { "/opt/cod4server/cod4server":
                 ensure => present,
-                source => "puppet:///modules/samba/smb.conf",
+                source => "puppet:///modules/cod/cod4server",
                 require => [ File["/opt/cod4server"], Exec["extract-package"], Package["screen"] ],
         }
 }
