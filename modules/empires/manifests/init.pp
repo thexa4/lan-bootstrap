@@ -28,8 +28,8 @@ class empires($username = "", $password = "", $verification = "") {
 	}
 	
 	exec { "fetch empires":
-		command => "/opt/updatetool/UpdateTool.exe -command install -game 17740 -dir /opt/empires/ -username $username -password $password -verify_all -steam_guard_code $verify",
-		unless => "/bin/false",
+		command => "wine /opt/updatetool/UpdateTool.exe -command install -game 17740 -dir /opt/empires/ -username $username -password $password -verify_all -steam_guard_code $verify",
+		unless => "/bin/true",
 		require => [ Exec["extract updatetool.rar"], Package["wine"] ],
 	}
 }
