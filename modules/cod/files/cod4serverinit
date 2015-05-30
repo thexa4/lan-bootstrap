@@ -15,10 +15,6 @@
 # Description:       Not actually a service at all.
 ### END INIT INFO
 
-. /etc/rc.status
-
-rc_reset
-
 case "$1" in
    start)
      # use colour for ease of spotting
