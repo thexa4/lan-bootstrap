@@ -9,6 +9,6 @@ class empires {
 	
 	exec { "download updatetool.rar":
 		command => "wget -qO- http://didrole.com/UpdateTool/UpdateTool-0.3.rar > /opt/updatetool.rar",
-		unless => "[ -f /opt/updatetool.rar" ]",
+		unless => "[ -f /opt/updatetool.rar ]",
 	}
 }
