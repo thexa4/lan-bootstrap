@@ -56,5 +56,16 @@ Removing the dhcp server:
 
 	#> ./lan destroy 100
 
+## Modules
+Currently the following modules have been implemented:
+
+ - Dhcp
+ - Mumble
+ - Dns (ns)
+ - Samba
+ - Trackmania
+ - Steam cache (cache)
+ - Openttd
+	
 ## Special thanks
  - http://blog.multiplay.co.uk/ for publishing the steam cache
