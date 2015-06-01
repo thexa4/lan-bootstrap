@@ -39,6 +39,7 @@ instructions on how to install proxmox on: http://www.proxmox.com
 
 ## Examples
 Initializing a basic lan server:
+
 	#> apt-get install git
     #> mkdir -r /opt/max/
     #> cd /opt/max
@@ -48,9 +49,11 @@ Initializing a basic lan server:
     #> ./lan add dhcp swordfish
 
 Adding the steam cache:
+
 	#> ./lan add cache1 swordfish
 
 Removing the dhcp server:
+
 	#> ./lan destroy 100
 
 ## Special thanks
