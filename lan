@@ -9,7 +9,7 @@
 
 IP_RANGE="192.168.1."
 REPO="https://github.com/thexa4/lan-bootstrap.git"
-DEBIAN_VERSION=7
+DEBIAN_VERSION=8
 
 ### End constants
 ### Start user defined functions

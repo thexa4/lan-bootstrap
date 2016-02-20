@@ -46,27 +46,27 @@ function init_vm_puppet {
 	
 	create_vm puppet 101 ${password}
 	
-	vzctl exec 101 apt-get -qq --yes install puppetmaster git
-	vzctl exec 101 mkdir /opt/max
-	vzctl exec 101 git clone ${REPO} /opt/max/puppet-lan > /dev/null
-	vzctl exec 101 rm -r /etc/puppet/modules /etc/puppet/puppet.conf
+	pct exec 101 apt-get -qq --yes install puppetmaster git
+	pct exec 101 mkdir /opt/max
+	pct exec 101 git clone ${REPO} /opt/max/puppet-lan > /dev/null
+	pct exec 101 rm -r /etc/puppet/modules /etc/puppet/puppet.conf
 	
-	vzctl exec 101 ln -s /opt/max/puppet-lan/puppet.conf /etc/puppet/puppet.conf
-	vzctl exec 101 ln -s /opt/max/puppet-lan/modules /etc/puppet/modules
-	vzctl exec 101 ln -s /opt/max/puppet-lan/manifests/site.pp /etc/puppet/manifests/site.pp
-	vzctl exec 101 ln -s /opt/max/puppet-lan/hiera.yaml /etc/puppet/hiera.yaml
-	vzctl exec 101 ln -s /opt/max/puppet-lan/hieradata /etc/puppet/hieradata
+	pct exec 101 ln -s /opt/max/puppet-lan/puppet.conf /etc/puppet/puppet.conf
+	pct exec 101 ln -s /opt/max/puppet-lan/modules /etc/puppet/modules
+	pct exec 101 ln -s /opt/max/puppet-lan/manifests/site.pp /etc/puppet/manifests/site.pp
+	pct exec 101 ln -s /opt/max/puppet-lan/hiera.yaml /etc/puppet/hiera.yaml
+	pct exec 101 ln -s /opt/max/puppet-lan/hieradata /etc/puppet/hieradata
 	
 	# Reset local config
-	vzctl exec 101 "echo --- >> /etc/puppet/hieradata/local.yaml"
-	vzctl exec 101 "echo domain: ${domain} >> /etc/puppet/hieradata/local.yaml"
+	pct exec 101 "echo --- >> /etc/puppet/hieradata/local.yaml"
+	pct exec 101 "echo domain: ${domain} >> /etc/puppet/hieradata/local.yaml"
 	
-	vzctl exec 101 service puppetmaster restart
-	vzctl exec 101 puppet agent
+	pct exec 101 service puppetmaster restart
+	pct exec 101 puppet agent
 	
 	local ip=$(get_ip 101)
-	vzctl exec 101 "echo hosts: >> /etc/puppet/hieradata/local.yaml"
-	vzctl exec 101 "echo '    puppet: ${ip}' >> /etc/puppet/hieradata/local.yaml"
+	pct exec 101 "echo hosts: >> /etc/puppet/hieradata/local.yaml"
+	pct exec 101 "echo '    puppet: ${ip}' >> /etc/puppet/hieradata/local.yaml"
 }
 
 function init_vm_ns1 {
@@ -75,7 +75,7 @@ function init_vm_ns1 {
 	
 	create_vm ns1 102 ${password}
 	
-	vzctl exec 102 "echo $(get_ip 101) puppet puppet.${domain} >> /etc/hosts"
+	pct exec 102 "echo $(get_ip 101) puppet puppet.${domain} >> /etc/hosts"
 	puppet_init 102
 }
 

@@ -36,7 +36,7 @@ function trigger_cache1_local {
 	echo '. ${VE_CONFFILE}' >> /etc/pve/local/openvz/${vmid}.mount
 	echo 'mount -n -t simfs /var/lib/vz/data/www ${VE_ROOT}/data/www -o /var/lib/vz/data/www' >> /etc/pve/local/openvz/${vmid}.mount
 	
-	vzctl restart "${vmid}"
+	pct restart "${vmid}"
 }
 
 function trigger_samba_local {
@@ -53,7 +53,7 @@ function trigger_samba_local {
         echo 'mount -n -t simfs /var/lib/vz/data/samba/games ${VE_ROOT}/data/games -o /var/lib/vz/data/samba/games' >> /etc/pve/local/openvz/${vmid}.mount
 		echo 'mount -n -t simfs /var/lib/vz/data/samba/inbox ${VE_ROOT}/data/inbox -o /var/lib/vz/data/samba/inbox' >> /etc/pve/local/openvz/${vmid}.mount
 
-        vzctl restart "${vmid}"
+        pct restart "${vmid}"
 }
 
 
@@ -67,15 +67,15 @@ iface eth0 inet static
 	netmask 255.255.255.0
 	gateway 192.168.1.1
 CONFIG
-	vzctl set "${vmid}" --netif_add eth0,,,,vmbr0 --ipdel all --save
+	pct set "${vmid}" --netif_add eth0,,,,vmbr0 --ipdel all --save
 
-	vzctl restart "${vmid}"
+	pct restart "${vmid}"
 }
 
 function trigger_openttd_local {
 	local vmid=$1
 	
-	vzctl exec "${vmid}" /etc/rc.local
+	pct exec "${vmid}" /etc/rc.local
 }
 
 function trigger_trackmania_local {
@@ -88,9 +88,9 @@ iface eth0 inet static
 	netmask 255.255.255.0
 	gateway 192.168.1.1
 CONFIG
-	vzctl set "${vmid}" --netif_add eth0,,,,vmbr0 --ipdel all --save
+	pct set "${vmid}" --netif_add eth0,,,,vmbr0 --ipdel all --save
 
-	vzctl restart "${vmid}"
+	pct restart "${vmid}"
 }
 
 # End Triggers

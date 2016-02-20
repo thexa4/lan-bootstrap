@@ -11,7 +11,7 @@ function next_vmid {
 function puppet_run {
 	local vmid=$1
 	echo "Running puppet on $vmid"
-	vzctl exec ${vmid} puppet agent --test || true
+	pct exec ${vmid} puppet agent --test || true
 }
 
 function puppet_apply {
@@ -19,8 +19,8 @@ function puppet_apply {
 	local filename=$RANDOM
 	
 	cat > /var/lib/vz/private/101/tmp/$filename.puppet
-	vzctl exec $vmid puppet apply /tmp/$filename.puppet
-	vzctl exec $vmid rm /tmp/$filename.puppet
+	pct exec $vmid puppet apply /tmp/$filename.puppet
+	pct exec $vmid rm /tmp/$filename.puppet
 }
 
 function sign {
@@ -30,17 +30,17 @@ function sign {
 	for i in $(seq 1 60)
 	do
 		sleep 1
-		if vzctl exec 101 stat "/var/lib/puppet/ssl/ca/requests/${fqdn}.pem" 2>/dev/null > /dev/null; then
+		if pct exec 101 stat "/var/lib/puppet/ssl/ca/requests/${fqdn}.pem" 2>/dev/null > /dev/null; then
 			echo "...found."
 			break
 		fi
 	done
-	vzctl exec 101 puppet ca sign "${fqdn}" > /dev/null
+	pct exec 101 puppet ca sign "${fqdn}" > /dev/null
 	echo "Waiting for signed certificate..."
 	for i in $(seq 1 60)
 	do
 		sleep 1
-		if vzctl exec 101 stat "/var/lib/puppet/ssl/ca/signed/${fqdn}.pem" 2>/dev/null > /dev/null; then
+		if pct exec 101 stat "/var/lib/puppet/ssl/ca/signed/${fqdn}.pem" 2>/dev/null > /dev/null; then
 			echo "...found."
 			break
 		fi
@@ -50,8 +50,8 @@ function sign {
 function puppet_init {
 	local vmid=$1
 	
-	local fqdn=$(vzctl exec ${vmid} 'hostname --fqdn')
-	vzctl exec ${vmid} puppet agent || true
+	local fqdn=$(pct exec ${vmid} 'hostname --fqdn')
+	pct exec ${vmid} puppet agent || true
 	
 	if [ -f /etc/lan-master.conf ]; then
 		master_do sign "$fqdn"
@@ -77,14 +77,14 @@ function create_vm {
 	sleep 1
 	
 	echo Updating ct ${hostname}
-	vzctl exec ${vmid} apt-get -qq update > /dev/null 2> /dev/null
-	vzctl exec ${vmid} apt-get -qq --yes install debian-keyring > /dev/null
-	vzctl exec ${vmid} apt-get -qq update 2> /dev/null
+	pct exec ${vmid} apt-get -qq update > /dev/null 2> /dev/null
+	pct exec ${vmid} apt-get -qq --yes install debian-keyring > /dev/null
+	pct exec ${vmid} apt-get -qq update 2> /dev/null
 
-	vzctl exec ${vmid} apt-get -qq --yes dist-upgrade > /dev/null
+	pct exec ${vmid} apt-get -qq --yes dist-upgrade > /dev/null
 	
 	echo Trusting puppet on ${vmid}
-	vzctl exec ${vmid} 'echo deb http://apt.puppetlabs.com wheezy main >> /etc/apt/sources.list'
+	pct exec ${vmid} 'echo deb http://apt.puppetlabs.com wheezy main >> /etc/apt/sources.list'
 	cat > /var/lib/vz/private/${vmid}/root/puppet.gpg << PUPPETKEY
 -----BEGIN PGP PUBLIC KEY BLOCK-----
 Version: GnuPG v1.4.12 (GNU/Linux)
@@ -254,11 +254,11 @@ ZTQcCD53HcBLvKX6RJ4ByYawKaQqMa27WK/YWVmFXqVDVk12iKrQW6zktDdGInnD
 =Gl+v
 -----END PGP PUBLIC KEY BLOCK-----
 PUPPETKEY
-	vzctl exec ${vmid} 'apt-key add /root/puppet.gpg' > /dev/null
-	vzctl exec ${vmid} 'rm /root/puppet.gpg'
+	pct exec ${vmid} 'apt-key add /root/puppet.gpg' > /dev/null
+	pct exec ${vmid} 'rm /root/puppet.gpg'
 	echo Installing puppet on ${hostname}
-	vzctl exec ${vmid} apt-get -qq update
-	vzctl exec ${vmid} apt-get -qq --yes install puppet > /dev/null
+	pct exec ${vmid} apt-get -qq update
+	pct exec ${vmid} apt-get -qq --yes install puppet > /dev/null
 	
 	echo Adding to hosts list
 	add_host "${hostname}" "${ip}" || true
