@@ -49,7 +49,7 @@ function trigger {
 	local vmid=$1
 	local hostname=$2
 	
-	if vzctl exec "$vmid" exit; then
+	if pct exec "$vmid" exit; then
 		if type "trigger_${hostname}_local" 2>/dev/null | grep -q function; then
 			trigger_${hostname}_local "$vmid" "$hostname"
 		fi
@@ -71,7 +71,7 @@ function add_host {
 	if [ -f /etc/lan-master.conf ]; then
 		master_do add-host "$hostname" "$ip"
 	else
-		vzctl exec 101 "echo '    ${hostname}: ${ip}' >> /etc/puppet/hieradata/local.yaml"
+		lxc-attach -n 101 -- /bin/bash -c "echo '    ${hostname}: ${ip}' >> /etc/puppet/hieradata/local.yaml"
 		puppet_run 102 || true
 	fi
 }
@@ -82,21 +82,20 @@ function destroy {
 	local vmid=$1
 	
 	# Check for existence
-	vzctl status "$vmid" | grep -q exist || exit 1
+	pct status "$vmid" | grep -q exist || exit 1
 	
-	local fqdn=$(vzctl exec "$vmid" hostname --fqdn)
+	local fqdn=$(pct exec "$vmid" hostname --fqdn)
 	
 	printf "Are you sure you want to destroy ct $vmid ($fqdn) [y/N]? "
 	read line
 	
 	if [ "$line" = "y" ]; then
-		vzctl stop "$vmid" || true
+		pct stop "$vmid" || true
 		
-		if vzctl status "$vmid" | grep -q " mounted"; then
-			vzctl umount "$vmid"
+		if pct status "$vmid" | grep -q " mounted"; then
+			pct umount "$vmid"
 		fi
 		
-		vzctl destroy "$vmid"
 		clean "$vmid" "$fqdn"
 	else
 		exit 1
@@ -114,7 +113,7 @@ function clean {
 		local hostname=$(echo $fqdn | cut -f1 -d.)
 		local ip=$(getent hosts $fqdn | cut -f1 -d' ')
 		
-		vzctl exec 101 puppet cert clean "$fqdn" || true
+		pct exec 101 puppet cert clean "$fqdn" || true
 		puppet_apply 101 << MANIFEST
 file_line { "hostline":
 	path => "/etc/puppet/hieradata/local.yaml",
@@ -136,7 +135,7 @@ function pull {
 	if [ -f "/etc/lan-master.conf" ]; then
 		master_do pull
 	else
-		vzctl exec 101 "cd /opt/max/puppet-lan/; git pull"
+		lxc-attach -n 101 -- /bin/bash -c "cd /opt/max/puppet-lan/; git pull"
 	fi
 }
 
