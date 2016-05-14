@@ -82,19 +82,15 @@ function destroy {
 	local vmid=$1
 	
 	# Check for existence
-	pct status "$vmid" | grep -q exist || exit 1
+	pct list | grep -q $vmid || exit 1
 	
-	local fqdn=$(pct exec "$vmid" hostname --fqdn)
+	local fqdn=$(lxc-attach -n $vmid -- hostname --fqdn)
 	
 	printf "Are you sure you want to destroy ct $vmid ($fqdn) [y/N]? "
 	read line
 	
 	if [ "$line" = "y" ]; then
 		pct stop "$vmid" || true
-		
-		if pct status "$vmid" | grep -q " mounted"; then
-			pct umount "$vmid"
-		fi
 		
 		clean "$vmid" "$fqdn"
 	else
