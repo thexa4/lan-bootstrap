@@ -12,7 +12,7 @@ class trackmania {
 	}
 
 	exec { "extract dedicated trackmania server":
-		command => "wget -qO- http://files2.trackmaniaforever.com/TrackmaniaServer_2011-02-21.zip > /opt/tmdedicated.zip && unzip /opt/tmdedicated.zip -d TmDedicatedServer",
+		command => "wget -qO- http://files2.trackmaniaforever.com/TrackmaniaServer_2011-02-21.zip > /opt/tmdedicated.zip && unzip /opt/tmdedicated.zip -d /opt/TmDedicatedServer",
 		unless => "[ -d /opt/TmDedicatedServer ]",
 		require => Package["unzip"],
 	}
