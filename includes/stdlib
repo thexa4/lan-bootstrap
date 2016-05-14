@@ -19,7 +19,7 @@ function puppet_apply {
 	local vmid=$1
 	local filename=$RANDOM
 	
-	lxc-attach -n $vmid -- bash -c 'cat > /tmp/$filename.puppet'
+	lxc-attach -n $vmid -- bash -c "cat > /tmp/$filename.puppet"
 	lxc-attach -n $vmid -- puppet apply /tmp/$filename.puppet
 	lxc-attach -n $vmid -- rm /tmp/$filename.puppet
 }
