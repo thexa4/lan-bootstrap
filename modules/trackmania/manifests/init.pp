@@ -27,7 +27,7 @@ class trackmania {
 		mode => 0775,
 	}
 
-	file { "/opt/TmDedicatedServer/dedicated.cfg":
+	file { "/opt/TmDedicatedServer/GameData/Config/dedicated_cfg.txt":
 		ensure => file,
 		source => "puppet:///modules/trackmania/dedicated.cfg",
 		require => Exec["extract dedicated trackmania server"],
