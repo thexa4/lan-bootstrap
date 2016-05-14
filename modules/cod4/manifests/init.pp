@@ -3,6 +3,7 @@ class cod4 {
 		ensure => present,
 
 	exec { "add-i386":
+					require => Package["libstdc++6:i386"],
         	command => '/usr/bin/dpkg --add-architecture i386',
         	unless => '/usr/bin/dpkg --print-foreign-architectures | /bin/grep i386',
      	}
@@ -12,7 +13,7 @@ class cod4 {
 		require => Exec["add-i386"],
 	}
 
-        exec { "download-tar": 
+        exec { "download-tar":
                 command => 'wget http://treefort.icculus.org/cod/cod4-linux-server-06282008.tar.bz2',
                 unless => 'ls /opt/cod4 | /bin/grep cod4.tar.bz2',
 		require => [ File["/opt/cod4"], Exec["/usr/bin/apt-get update"] ],
@@ -23,12 +24,12 @@ class cod4 {
 		unless => 'ls /opt/cod4server | grep cod4-linux-server,
 		require => Exec["download-tar"],
 	}
-	
+
 	service { "cod4server":
 		ensure => running,
 		require => File["/etc/init.d/cod4server"],
 	}
-	
+
 	file { "/opt/cod4server/general.cfg":
 		ensure => present,
 		source => "puppet:///modules/cod4/general.cfg",
@@ -53,4 +54,3 @@ class cod4 {
                 require => [ File["/opt/cod4server"], Exec["extract-package"], Package["Screen"] ],
         }
 }
-
