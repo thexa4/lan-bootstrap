@@ -28,32 +28,32 @@ MANIFEST
 function trigger_cache1_local {
 	
 	local vmid=$1
-	if [ ! -d /var/lib/vz/data/ ]; then mkdir /var/lib/vz/data/; fi
-	if [ ! -d /var/lib/vz/data/www/ ]; then mkdir /var/lib/vz/data/www/; fi
+	#if [ ! -d /var/lib/vz/data/ ]; then mkdir /var/lib/vz/data/; fi
+	#if [ ! -d /var/lib/vz/data/www/ ]; then mkdir /var/lib/vz/data/www/; fi
 	
-	echo '#!/bin/bash' > /etc/pve/local/openvz/${vmid}.mount
-	echo '. /etc/vz/vz.conf' >> /etc/pve/local/openvz/${vmid}.mount
-	echo '. ${VE_CONFFILE}' >> /etc/pve/local/openvz/${vmid}.mount
-	echo 'mount -n -t simfs /var/lib/vz/data/www ${VE_ROOT}/data/www -o /var/lib/vz/data/www' >> /etc/pve/local/openvz/${vmid}.mount
+	#echo '#!/bin/bash' > /etc/pve/local/openvz/${vmid}.mount
+	#echo '. /etc/vz/vz.conf' >> /etc/pve/local/openvz/${vmid}.mount
+	#echo '. ${VE_CONFFILE}' >> /etc/pve/local/openvz/${vmid}.mount
+	#echo 'mount -n -t simfs /var/lib/vz/data/www ${VE_ROOT}/data/www -o /var/lib/vz/data/www' >> /etc/pve/local/openvz/${vmid}.mount
 	
-	pct restart "${vmid}"
+	#pct restart "${vmid}"
 }
 
 function trigger_samba_local {
 
         local vmid=$1
-        if [ ! -d /var/lib/vz/data/ ]; then mkdir /var/lib/vz/data/; fi
-        if [ ! -d /var/lib/vz/data/samba/ ]; then mkdir /var/lib/vz/data/games/; fi
-		if [ ! -d /var/lib/vz/data/samba/games ]; then mkdir /var/lib/vz/data/inbox/; fi
-		if [ ! -d /var/lib/vz/data/samba/games ]; then mkdir /var/lib/vz/data/inbox/; fi
+        #if [ ! -d /var/lib/vz/data/ ]; then mkdir /var/lib/vz/data/; fi
+        #if [ ! -d /var/lib/vz/data/samba/ ]; then mkdir /var/lib/vz/data/games/; fi
+	#	if [ ! -d /var/lib/vz/data/samba/games ]; then mkdir /var/lib/vz/data/inbox/; fi
+	#	if [ ! -d /var/lib/vz/data/samba/games ]; then mkdir /var/lib/vz/data/inbox/; fi
 
-        echo '#!/bin/bash' > /etc/pve/local/openvz/${vmid}.mount
-        echo '. /etc/vz/vz.conf' >> /etc/pve/local/openvz/${vmid}.mount
-        echo '. ${VE_CONFFILE}' >> /etc/pve/local/openvz/${vmid}.mount
-        echo 'mount -n -t simfs /var/lib/vz/data/samba/games ${VE_ROOT}/data/games -o /var/lib/vz/data/samba/games' >> /etc/pve/local/openvz/${vmid}.mount
-		echo 'mount -n -t simfs /var/lib/vz/data/samba/inbox ${VE_ROOT}/data/inbox -o /var/lib/vz/data/samba/inbox' >> /etc/pve/local/openvz/${vmid}.mount
+        #echo '#!/bin/bash' > /etc/pve/local/openvz/${vmid}.mount
+        #echo '. /etc/vz/vz.conf' >> /etc/pve/local/openvz/${vmid}.mount
+        #echo '. ${VE_CONFFILE}' >> /etc/pve/local/openvz/${vmid}.mount
+        #echo 'mount -n -t simfs /var/lib/vz/data/samba/games ${VE_ROOT}/data/games -o /var/lib/vz/data/samba/games' >> /etc/pve/local/openvz/${vmid}.mount
+	#echo 'mount -n -t simfs /var/lib/vz/data/samba/inbox ${VE_ROOT}/data/inbox -o /var/lib/vz/data/samba/inbox' >> /etc/pve/local/openvz/${vmid}.mount
 
-        pct restart "${vmid}"
+        #pct restart "${vmid}"
 }
 
 
@@ -75,22 +75,13 @@ CONFIG
 function trigger_openttd_local {
 	local vmid=$1
 	
-	pct exec "${vmid}" /etc/rc.local
+	lxc-attach -n ${vmid} -- /etc/rc.local
 }
 
 function trigger_trackmania_local {
 	local vmid=$1
-	local ip=$(get_ip ${vmid})
-	cat > /var/lib/vz/private/${vmid}/etc/network/interfaces.tail << CONFIG
-auto eth0
-iface eth0 inet static
-	address $ip
-	netmask 255.255.255.0
-	gateway 192.168.1.1
-CONFIG
-	pct set "${vmid}" --netif_add eth0,,,,vmbr0 --ipdel all --save
 
-	pct restart "${vmid}"
+	#pct restart "${vmid}"
 }
 
 # End Triggers

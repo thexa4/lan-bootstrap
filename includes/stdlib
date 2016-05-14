@@ -11,7 +11,7 @@ function next_vmid {
 function puppet_run {
 	local vmid=$1
 	echo "Running puppet on $vmid"
-	local puppetns=$(lxc-attach -n 101 -- hostname --fqdn)
+	local puppetns=$(lxc-attach -n ${vmid} -- hostname --fqdn | sed -re 's/^[^\.]+\./puppet./g')
 	lxc-attach -n ${vmid} -- puppet agent --test --server ${puppetns} || true
 }
 
@@ -52,7 +52,7 @@ function puppet_init {
 	local vmid=$1
 	
 	local fqdn=$(lxc-attach -n ${vmid} -- hostname --fqdn)
-	local puppetns=$(lxc-attach -n 101 -- hostname --fqdn)
+	local puppetns=$(lxc-attach -n ${vmid} -- hostname --fqdn | sed -re 's/^[^\.]+\./puppet./g')
 	lxc-attach -n ${vmid} -- puppet agent --enable || true
 	lxc-attach -n ${vmid} -- puppet agent --server ${puppetns} --test || true
 	
