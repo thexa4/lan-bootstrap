@@ -11,7 +11,7 @@ class factorio {
 	exec { "extract-factorio":
 		command => '/usr/bin/tar -C /opt -xzf /opt/factorio.tgz',
 		require => Exec["download-factorio-tar"],
-		unless => '/bin/test -d /opt/factorio ]',
+		unless => '/usr/bin/test -d /opt/factorio ]',
 	}
 
 	file { "/etc/rc.local":
