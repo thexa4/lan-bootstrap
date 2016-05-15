@@ -14,6 +14,12 @@ class factorio {
 		unless => 'test -d /opt/factorio ]',
 	}
 
+	exec { "create-world":
+		command => '/opt/factorio/bin/x64/factorio --create lan',
+		require => Exec["extract-factorio"],
+		unless => 'test -f /opt/factorio/saves/lan.zip ]'
+	}
+
 	file { "/etc/rc.local":
 		source => "puppet:///modules/factorio/rc.local",
 		ensure => present,
