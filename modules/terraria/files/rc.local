@@ -1,0 +1,6 @@
+#!/bin/sh -e
+#
+# rc.local
+#
+tmux new-session -d "/opt/terraria/tshock/TerrariaServer.exe"
+exit 0
