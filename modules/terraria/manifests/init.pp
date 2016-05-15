@@ -20,7 +20,7 @@ class terraria {
 	
 	file { "/etc/rc.local":
 		ensure => present,
-		source => "puppet:///modules/openttd/rc.local",
+		source => "puppet:///modules/terraria/rc.local",
 		mode => 0775,
 	}
 	
