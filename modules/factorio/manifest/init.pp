@@ -15,7 +15,7 @@ class factorio {
 	}
 
 	file { "/etc/rc.local":
-		source => "puppet:///factorio/rc.local",
+		source => "puppet:///modules/factorio/rc.local",
 		ensure => present,
 	}
 }
