@@ -1,7 +1,7 @@
 class factorio {
 	exec { "download-factorio-tar":
-		command => '/usr/bin/wget -qO- http://www.factorio.com/get-download/0.12.33/headless/linux64 > /opt/factorio.tgz',
-		unless => '/usr/bin/test -f /opt/factorio.tgz ]',
+		command => 'wget -qO- http://www.factorio.com/get-download/0.12.33/headless/linux64 > /opt/factorio.tgz',
+		unless => 'test -f /opt/factorio.tgz ]',
 	}
 
 	package { "tmux":
@@ -9,9 +9,9 @@ class factorio {
 	}
 
 	exec { "extract-factorio":
-		command => '/usr/bin/tar -C /opt -xzf /opt/factorio.tgz',
+		command => 'tar -C /opt -xzf /opt/factorio.tgz',
 		require => Exec["download-factorio-tar"],
-		unless => '/usr/bin/test -d /opt/factorio ]',
+		unless => 'test -d /opt/factorio ]',
 	}
 
 	file { "/etc/rc.local":
