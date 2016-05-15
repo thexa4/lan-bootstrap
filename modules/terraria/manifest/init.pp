@@ -9,7 +9,8 @@ class terraria {
 	}
 
 	exec { "download terraria":
-		command => "wget -qO- https://github.com/NyxStudios/TShock/releases/download/v4.3.12/tshock_4.3.12.zip > /opt/terraria/tshock.zip && unzip /opt/terraria/tshock.zip -d /opt/terraria",
+		command => "wget -qO- https://github.com/NyxStudios/TShock/releases/download/v4.3.12/tshock_4.3.12.zip > /tmp/tshock.zip && unzip /tmp/tshock.zip -d /opt/terraria && rm /tmp/tschock.zip",
+		unless => "[ -d /opt/terraria ]",
 	}
 
 	package { "tmux":
