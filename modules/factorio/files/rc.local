@@ -2,5 +2,5 @@
 #
 # rc.local
 #
-tmux new-session -d "/opt/factorio/bin/factorio"
+tmux new-session -d "/opt/factorio/bin/x64/factorio"
 exit 0
