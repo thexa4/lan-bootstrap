@@ -2,5 +2,5 @@
 #
 # rc.local
 #
-tmux new-session -d "/opt/terraria/tshock/TerrariaServer.exe"
+tmux new-session -d "mono /opt/terraria/TerrariaServer.exe -autocreate 1 -world BolkLan"
 exit 0
