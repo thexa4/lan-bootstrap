@@ -1,49 +1,52 @@
-class openttd {
-	
-	exec { "install openttd":
-		command => "wget -qO- http://binaries.openttd.org/releases/1.5.0/openttd-1.5.0-linux-generic-i686.tar.gz | gunzip | tar -xC /opt/",
-		onlyif => "[ ! -d /opt/openttd-1.5.0-linux-generic-i686/ ]",
-	}
-	
-	exec { "download openttd-opengfx":
-		command => "wget -qO- http://binaries.openttd.org/extra/opengfx/0.5.2/opengfx-0.5.2-all.zip > /tmp/opengfx.zip && unzip /tmp/opengfx.zip -d /root/.openttd/baseset && rm /tmp/opengfx.zip",
-		onlyif => "[ ! -f /root/.openttd/baseset/opengfx-0.5.2.tar ]",
-		require => [ Package["unzip"], File["/root/.openttd/baseset"] ],
-	}
-	
-	package { "unzip":
-		ensure => present,
-	}
-	
-	package { "libsdl1.2debian":
-		ensure => present,
-	}
-	
-	package { "libfontconfig":
-		ensure => present,
-	}	
-	
-	file { "/opt/openttd":
-		ensure => link,
-		target => "/opt/openttd-1.5.0-linux-generic-i686",
-	}
-	
-	file { "/root/.openttd":
-		ensure => directory,
-	}
-	
-	file { "/root/.openttd/baseset":
-		ensure => directory,
-		require => File["/root/.openttd"],	
-	}
-		
-	package { "tmux":
-		ensure => present,
-	}
-	
-	file { "/etc/rc.local":
-		ensure => present,
-		source => "puppet:///modules/openttd/rc.local",
-		mode => 0775,
-	}
+class openttd(
+  $version = '1.6.1',
+  $gfx_version = '0.5.2',
+){
+  
+  exec { 'install openttd':
+    command => "wget -qO- http://binaries.openttd.org/releases/${version}/openttd-${version}-linux-generic-i686.tar.gz | gunzip | tar -xC /opt/",
+    creates => "/opt/openttd-${version}-linux-generic-i686",
+  }
+  
+  exec { 'download openttd-opengfx':
+    command => "wget -qO- http://binaries.openttd.org/extra/opengfx/${gfx_version}/opengfx-${gfx_version}-all.zip > /tmp/opengfx.zip && unzip /tmp/opengfx.zip -d /root/.openttd/baseset && rm /tmp/opengfx.zip",
+    creates => "/root/.openttd/baseset/opengfx-${gfx_version}.tar",
+    require => [ Package['unzip'], File['/root/.openttd/baseset'] ],
+  }
+  
+  package { 'unzip':
+    ensure => present,
+  }
+  
+  package { 'libsdl1.2debian':
+    ensure => present,
+  }
+  
+  package { 'libfontconfig':
+    ensure => present,
+  }
+  
+  file { '/opt/openttd':
+    ensure => link,
+    target => "/opt/openttd-${version}-linux-generic-i686",
+  }
+  
+  file { '/root/.openttd':
+    ensure => directory,
+  }
+  
+  file { '/root/.openttd/baseset':
+    ensure  => directory,
+    require => File['/root/.openttd'],
+  }
+    
+  package { 'tmux':
+    ensure => present,
+  }
+  
+  file { '/etc/rc.local':
+    ensure => present,
+    source => 'puppet:///modules/openttd/rc.local',
+    mode   => '0775',
+  }
 }

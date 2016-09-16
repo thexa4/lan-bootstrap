@@ -1,0 +1,23 @@
+{
+  "name": "thexa4-cod4",
+  "version": "0.1.0",
+  "author": "thexa4",
+  "summary": "Puppet module to set up a Call of Duty 4 server",
+  "license": "MIT",
+  "source": "https://github.com/thexa4/puppet-cod4",
+  "project_page": "https://github.com/thexa4/puppet-cod4",
+  "issues_url": "https://github.com/thexa4/puppet-cod4/issues",
+  "dependencies": [
+  
+  ],
+  "data_provider": null,
+  "operatingsystem_support": [
+    {
+      "operatingsystem": "Debian",
+      "operatingsystemrelease": [
+        "7",
+        "8"
+      ]
+    }
+  ]
+}

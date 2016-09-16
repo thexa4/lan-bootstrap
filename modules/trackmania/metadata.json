@@ -1,0 +1,23 @@
+{
+  "name": "thexa4-trackmania",
+  "version": "0.1.0",
+  "author": "thexa4",
+  "summary": "Puppet module to set up a Trackmania server",
+  "license": "MIT",
+  "source": "https://github.com/thexa4/puppet-trackmania",
+  "project_page": "https://github.com/thexa4/puppet-trackmania",
+  "issues_url": "https://github.com/thexa4/puppet-trackmania/issues",
+  "dependencies": [
+  
+  ],
+  "data_provider": null,
+  "operatingsystem_support": [
+    {
+      "operatingsystem": "Debian",
+      "operatingsystemrelease": [
+        "7",
+        "8"
+      ]
+    }
+  ]
+}

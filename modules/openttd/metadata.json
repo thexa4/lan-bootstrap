@@ -1,0 +1,23 @@
+{
+  "name": "thexa4-openttd",
+  "version": "0.1.0",
+  "author": "thexa4",
+  "summary": "A puppet module to set up an OpenTTD server",
+  "license": "MIT",
+  "source": "https://github.com/thexa4/puppet-openttd",
+  "project_page": "https://github.com/thexa4/puppet-openttd",
+  "issues_url": "https://github.com/thexa4/puppet-openttd/issues",
+  "dependencies": [
+  
+  ],
+  "data_provider": null,
+  "operatingsystem_support": [
+    {
+      "operatingsystem": "Debian",
+      "operatingsystemrelease": [
+        "7",
+        "8"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "name": "thexa4-game_cache",
+  "version": "0.2.0",
+  "author": "thexa4",
+  "summary": "A puppet module to setup a caching proxy for Steam",
+  "license": "MIT",
+  "source": "https://github.com/thexa4/puppet-game_cache",
+  "project_page": "https://github.com/thexa4/puppet-game_cache",
+  "issues_url": "https://github.com/thexa4/puppet-game_cache/issues",
+  "dependencies": [
+  
+  ],
+  "data_provider": null,
+  "operatingsystem_support": [
+    {
+      "operatingsystem": "Debian",
+      "operatingsystemrelease": [
+        "8"
+      ]
+    }
+  ]
+}

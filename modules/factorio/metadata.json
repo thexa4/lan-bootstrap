@@ -1,0 +1,23 @@
+{
+  "name": "thexa4-factorio",
+  "version": "0.1.0",
+  "author": "thexa4",
+  "summary": "A puppet module to set up a Factorio server",
+  "license": "MIT",
+  "source": "https://github.com/thexa4/puppet-factorio",
+  "project_page": "https://github.com/thexa4/puppet-factorio",
+  "issues_url": "https://github.com/thexa4/puppet-factorio/issues",
+  "dependencies": [
+  
+  ],
+  "data_provider": null,
+  "operatingsystem_support": [
+    {
+      "operatingsystem": "Debian",
+      "operatingsystemrelease": [
+        "7",
+        "8"
+      ]
+    }
+  ]
+}

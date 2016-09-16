@@ -1,35 +1,35 @@
 class trackmania {
-	package { "mysql-server":
-		ensure => present,
-	}
+  package { 'mysql-server':
+    ensure => present,
+  }
 
-	package { "unzip":
-		ensure => present,
-	}
+  package { 'unzip':
+    ensure => present,
+  }
 
-	package { "php5":
-		ensure => present,
-	}
+  package { 'php5':
+    ensure => present,
+  }
 
-	exec { "extract dedicated trackmania server":
-		command => "wget -qO- http://files2.trackmaniaforever.com/TrackmaniaServer_2011-02-21.zip > /opt/tmdedicated.zip && unzip /opt/tmdedicated.zip -d /opt/TmDedicatedServer",
-		unless => "[ -d /opt/TmDedicatedServer ]",
-		require => Package["unzip"],
-	}
+  exec { 'extract dedicated trackmania server':
+    command => 'wget -qO- http://files2.trackmaniaforever.com/TrackmaniaServer_2011-02-21.zip > /opt/tmdedicated.zip && unzip /opt/tmdedicated.zip -d /opt/TmDedicatedServer',
+    creates => '/opt/TmDedicatedServer',
+    require => Package['unzip'],
+  }
 
-	package { "tmux":
-		ensure => present,
-	}
+  package { 'tmux':
+    ensure => present,
+  }
 
-	file { "/etc/rc.local":
-		ensure => file,
-		source => "puppet:///modules/trackmania/rc.local",
-		mode => 0775,
-	}
+  file { '/etc/rc.local':
+    ensure => file,
+    source => 'puppet:///modules/trackmania/rc.local',
+    mode   => '0775',
+  }
 
-	file { "/opt/TmDedicatedServer/GameData/Config/dedicated_cfg.txt":
-		ensure => file,
-		source => "puppet:///modules/trackmania/dedicated.cfg",
-		require => Exec["extract dedicated trackmania server"],
-	}
+  file { '/opt/TmDedicatedServer/GameData/Config/dedicated_cfg.txt':
+    ensure  => file,
+    source  => 'puppet:///modules/trackmania/dedicated.cfg',
+    require => Exec['extract dedicated trackmania server'],
+  }
 }
