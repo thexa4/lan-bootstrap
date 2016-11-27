@@ -1,1 +1,1 @@
-export VM_NETWORK_INTERFACE = 'vmbr1';
+export VM_NETWORK_INTERFACE = 'vmbr0';
