@@ -31,7 +31,12 @@ if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 . "$DIR/includes/triggers"
 
 # Load custom configuration if present
-if [[ ! -f "$DIR/config" ]] && . "$DIR/config" fi
+if [[ ! -f "$DIR/config" ]] then
+    echo "Using custom configuration file includes/config"
+    . "$DIR/config"
+else
+    echo "Custom configuration /includes/config not present: using defaults"
+fi
 
 subcommand=${1:-help}
 
