@@ -31,10 +31,10 @@ if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 . "$DIR/includes/triggers"
 
 # Load custom configuration if present
-if [[ ! -f "$DIR/config" ]]
+if [[ -f "$DIR/includes/config" ]]
 then
     echo "Using custom configuration file includes/config"
-    . "$DIR/config"
+    . "$DIR/includes/config"
 else
     echo "Custom configuration /includes/config not present: using defaults"
 fi
