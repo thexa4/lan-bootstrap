@@ -75,7 +75,7 @@ function create_vm {
 	local ip=$(get_ip $vmid)
 
 	echo "Creating ct ${hostname} (vmid: ${vmid}, disk: ${disk}, ip: ${ip})"
-	pct create ${vmid} /var/lib/vz/template/cache/debian-${DEBIAN_VERSION}* -rootfs ${disk} -storage local-zfs -hostname ${hostname} -net0 name=eth0,ip=${ip}/24,gw=192.168.1.1,bridge=vmbr1 -onboot 1 > /dev/null
+	pct create ${vmid} /var/lib/vz/template/cache/debian-${DEBIAN_VERSION}* -rootfs ${disk} -storage local-zfs -hostname ${hostname} -net0 name=eth0,ip=${ip}/24,gw=192.168.1.1,bridge=${VM_NETWORK_INTERFACE:-vmbr0} -onboot 1 > /dev/null
 	pct start ${vmid} > /dev/null
 	sleep 1
 	# todo, set rootpw

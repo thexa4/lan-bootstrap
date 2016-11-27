@@ -1,6 +1,9 @@
 # lan-bootstrap
 A set of scripts to setup all the necessary infrastructure for a lan party
 
+## Configuration
+A number of parameters are configurable for your local environment. This step is optional: useful defaults are given for every parameter. Copy `includes/config.example` to `includes/config` and adapt as needed.
+
 ## Usage
 ### ./lan init cluster_name domain container_root_pw
 Initializes the master with a given cluster name, domain name and the root passwords for

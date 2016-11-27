@@ -3,7 +3,7 @@
 ###
 # Lan Bootstrap
 # Initializes and configures a proxmox cluster with necessary services to run a lan
-# 
+#
 # WARNING! This script assumes a cleanly installed proxmox server.
 ### Start constants
 
@@ -30,6 +30,9 @@ if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 . "$DIR/includes/init"
 . "$DIR/includes/triggers"
 
+# Load custom configuration if present
+if [[ ! -f "$DIR/config" ]] && . "$DIR/config" fi
+
 subcommand=${1:-help}
 
 function help {
@@ -48,15 +51,15 @@ function help {
 function trigger {
 	local vmid=$1
 	local hostname=$2
-	
+
 	if pct exec "$vmid" exit; then
 		if type "trigger_${hostname}_local" 2>/dev/null | grep -q function; then
 			trigger_${hostname}_local "$vmid" "$hostname"
 		fi
 	fi
-	
+
 	if [ -f "/etc/lan-master.conf" ]; then
-		master_do trigger "$vmid" "$hostname"	
+		master_do trigger "$vmid" "$hostname"
 	else
 		if type "trigger_${hostname}_remote" 2>/dev/null | grep -q function; then
 			trigger_${hostname}_remote "$vmid" "$hostname"
@@ -67,7 +70,7 @@ function trigger {
 function add_host {
 	local hostname=$1
 	local ip=$2
-	
+
 	if [ -f /etc/lan-master.conf ]; then
 		master_do add-host "$hostname" "$ip"
 	else
@@ -80,18 +83,18 @@ function add_host {
 
 function destroy {
 	local vmid=$1
-	
+
 	# Check for existence
 	pct list | grep -q $vmid || exit 1
-	
+
 	local fqdn=$(lxc-attach -n $vmid -- hostname --fqdn)
-	
+
 	printf "Are you sure you want to destroy ct $vmid ($fqdn) [y/N]? "
 	read line
-	
+
 	if [ "$line" = "y" ]; then
 		pct stop "$vmid" || true
-		
+
 		clean "$vmid" "$fqdn"
 	else
 		exit 1
@@ -101,14 +104,14 @@ function destroy {
 function clean {
 	local vmid=$1
 	local fqdn=$2
-	
+
 	if [ -f /etc/lan-master.conf ]; then
 		master_do clean "$vmid" "$fqdn"
 	else
-		
+
 		local hostname=$(echo $fqdn | cut -f1 -d.)
 		local ip=$(getent hosts $fqdn | cut -f1 -d' ')
-		
+
 		pct exec 101 puppet cert clean "$fqdn" || true
 		puppet_apply 101 << MANIFEST
 file_line { "hostline":
@@ -127,7 +130,7 @@ function pull {
 		cd $dir
 		git pull
 	)
-	
+
 	if [ -f "/etc/lan-master.conf" ]; then
 		master_do pull
 	else
@@ -140,11 +143,11 @@ function add {
 	local password=$2
 	local disk=$3
 	local vmid=$(next_vmid)
-	
+
 	create_vm "$hostname" "$vmid" "$password" "$disk"
 	puppet_init "$vmid"
 	puppet_run "$vmid"
-	
+
 	trigger "$vmid" "$hostname"
 }
 
@@ -208,4 +211,4 @@ case $subcommand in
 		help
 		;;
 esac
-exit 0	
+exit 0
