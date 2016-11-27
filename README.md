@@ -1,8 +1,10 @@
 # lan-bootstrap
 A set of scripts to setup all the necessary infrastructure for a lan party
 
-## Configuration
-A number of parameters are configurable for your local environment. This step is optional: useful defaults are given for every parameter. Copy `includes/config.example` to `includes/config` and adapt as needed.
+## Host configuration
+Installing a proxmox master or follower sometimes requires configuration for your local environment (which network interface to use, etc.). These parameters can be configured in advance. This step is optional: useful defaults are given for every parameter.
+
+Copy `includes/config.example` to `includes/config` and adapt as needed. Note: you might need to change the configuration before setting up the master or joining a follower to the cluster.
 
 ## Usage
 ### ./lan init cluster_name domain container_root_pw
@@ -69,6 +71,6 @@ Currently the following modules have been implemented:
  - Trackmania
  - Steam cache (cache)
  - Openttd
-	
+
 ## Special thanks
  - http://blog.multiplay.co.uk/ for publishing the steam cache
