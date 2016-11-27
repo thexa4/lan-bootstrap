@@ -1,0 +1,1 @@
+export VM_NETWORK_INTERFACE = 'vmbr0';
